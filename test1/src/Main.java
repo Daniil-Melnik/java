@@ -2,6 +2,7 @@
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 import Interfaces.TestInt5;
 import Interfaces.FunctInt1;
+import Interfaces.TestInt6;
 import Interfaces.FunctInt2;
 
 //import static jdk.internal.org.jline.utils.Colors.s;
@@ -93,12 +94,30 @@ void main() throws NoSuchMethodException, InvocationTargetException, Instantiati
     int [][] arrI = {{1,2}, {2,1}, {1,1}};
     comparate(arrI, (i1, i2) -> i1 > i2 ? 1 : i1 == i2 ? 0 : -1);*/
 
-    int [][] arrI = {{1,2}, {2,1}, {1,1}};
+    /* int [][] arrI = {{1,2}, {2,1}, {1,1}};
     functInt1 fI = new functInt1();
-    comparateThis(arrI, fI::comparate2);
+    comparateThis(arrI, fI::comparate3); */
     // comparateThis(arrI, (i1, i2) -> -1);
 
     // prepExample2("QQQ", 2);
+
+    // Внутренние классы
+    /*Person p1 = new Person(); //
+    Person p2 = new Person("Dedus", (byte) 5);
+
+    Person.InterClass intCl1 = p1.new InterClass();
+    Person.InterClass intCl2 = p2.new InterClass();
+
+    System.out.printf("%s %s\n", intCl1.getPersName(), intCl2.getPersName());*/
+
+    //getCompare(4);
+
+    TestInt6.TestInt6Cl t6 = new TestInt6.TestInt6Cl();
+
+    IntTest6 i6 = new IntTest6();
+    System.out.println(TestInt6.getStr1()); // к внутреннему классу в инт-се и статическому методу только от имени онтерфейса
+
+    Person.InterClass ip = (new Person()).new InterClass();
 }
 
 private void testL(TestInt5 t, String sm){
@@ -120,12 +139,19 @@ private void comparateThis(int [][] arr, FunctInt1 f){
 private class functInt1 implements  FunctInt1{
     @Override
     public int comparate(int i1, int i2){
+        return i1 > i2 ? 5 : i1 == i2 ? 0 : -5;
+    }
+
+    public int comparate2(int i1, int i2){
         return i1 > i2 ? 1 : i1 == i2 ? 0 : -1;
     }
 
-    @Override
-    public int comparate2(int i1, int i2){
-        return i1 > i2 ? 1 : i1 == i2 ? 0 : -1;
+    /*public int comparate2(int i1, int i2, int i3){
+        return i1 > i2 ? 1 : i1 == i2 ? 0 : -1; // другой вариант comparate2 (иная сигнатура), ОШИБКА, сигнатура должна быть одинаковой с объявленным методом в интерфейсе.
+    }*/
+
+    public int comparate3(int i1, int i2){
+        return i1 > i2 ? 3 : i1 == i2 ? 0 : -3;
     }
 };
 
@@ -147,6 +173,33 @@ public void prepExample2(String Text, int a){
     };
     //r.accept(Text2);
     for (int i = 0; i < a; i++) r.accept(i);
+}
+
+private void getCompare(int b){ // с внутренним локальным классом
+    int a = 1; // локальная переменная
+    class functInt2 implements FunctInt1
+    {
+        @Override
+        public int comparate(int i1, int i2){
+            return 1 + a + b; // Локальный Внут. класс имеет доступ к локальным переменным и параметрам метода которые не могут быть изменены (действительно конечные)
+        }
+    }
+    int [][] arr = {{1,2}, {2,1}, {1,1}};
+    functInt2 fI2 = new functInt2();
+    comparateThis(arr, fI2::comparate);
+}
+
+private void getCompare2(int b){ // с внутренним локальным анонимным классом
+    int a = 1; // локальная переменная
+    FunctInt1 f = new FunctInt1() {
+        @Override
+        public int comparate(int a, int b) {
+            return 0;
+        }
+    };
+
+    int [][] arr = {{1,2}, {2,1}, {1,1}};
+    comparateThis(arr, f::comparate);
 }
 
 
