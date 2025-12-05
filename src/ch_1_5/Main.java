@@ -3,7 +3,6 @@
 import Interfaces.TestInt5;
 import Interfaces.FunctInt1;
 import Interfaces.TestInt6;
-import Interfaces.FunctInt2;
 
 //import static jdk.internal.org.jline.utils.Colors.s;
 
