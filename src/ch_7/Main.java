@@ -1,5 +1,10 @@
 package ch_7;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.nio.charset.StandardCharsets;
+import java.util.Scanner;
+
 public class Main {
     public static void main(String [] args) {
 
@@ -17,5 +22,11 @@ public class Main {
         // TestClass.TestChainOfExeptions("333");
         // TestClass.TestChainOfExeptions("1");
         // TestClass.TestChainOfExeptions("");
+
+        try (var in = new Scanner(new FileInputStream("C:\\text\\1.txt"), StandardCharsets.UTF_8)){
+            while (in.hasNext()) System.out.println(in.next());
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

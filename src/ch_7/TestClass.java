@@ -45,6 +45,9 @@ public class TestClass {
                     printExeptionTrace(e2m.getCause().getCause(), e2m.getCause(), e2m);
                     // System.out.printf("%s -> %s -> %s", e2m.getCause().getCause(), e2m.getCause(), e2m); наглядная цепь
                 }
+                finally {
+                    System.out.println("Всё равно выполняестя");
+                }
             }
         }
     }
