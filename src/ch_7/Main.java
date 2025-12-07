@@ -1,4 +1,4 @@
-//package ch_7;
+package ch_7;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
