@@ -20,8 +20,19 @@ public class Main {
 
         // ============= тестирование обобщенного класса с ограничением
 
-        TestClass3<TestClass21> testClass21_1 = new TestClass3<>(new TestClass21());
-        System.out.println(testClass21_1.toString());
+        /*TestClass3<TestClass21> testClass21_1 = new TestClass3<>(new TestClass21());
+        System.out.println(testClass21_1.toString());*/
+
+        // ============= тестирование подстановочного типа с ограничением сверху
+        /* TestClass21 t1 = new TestClass21(1, "test_1");
+        TestClass21 t2 = new TestClass21(2, "test_2");
+        testWildcardsExt(new TestClass0<TestClass21>(t1,t2));*/
+
+        // ============= тестирование подстановочного типа с ограничением снизу
+        TestClass21 t1 = new TestClass21(1, "test_1");
+        TestClass21 t2 = new TestClass21(2, "test_2");
+        testWildcardsSup(new TestClass0<TestClass21>(t1, t2));
+        
     }
 
     public static  <T> void getStringOfObject(T el){ // обобщенный метод
@@ -29,7 +40,14 @@ public class Main {
     }
 
     public static <T extends TestClass2> void getStringOfObject2(T el){ // обобщенный метод с ограничением extends
-
         System.out.println(el.toString());
+    }
+
+    public static void testWildcardsExt(TestClass0<? extends TestClass2> t){ // тестирование подстановочного типа с ограничением сверху
+        t.prntOfPair();
+    }
+
+    public static void testWildcardsSup(TestClass0<? super TestClass211> t){ // тестирование подстановочного типа с ограничением снизу
+        t.prntOfPair();
     }
 }

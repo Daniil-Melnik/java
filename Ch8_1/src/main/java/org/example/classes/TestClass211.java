@@ -1,11 +1,11 @@
 package org.example.classes;
 
-public class TestClass21 extends TestClass2{
-    public TestClass21(){
+public class TestClass211 extends TestClass21 {
+    public TestClass211(){
         super();
     }
 
-    public TestClass21(int num, String str){
+    public TestClass211(int num, String str){
         super(num, str);
     }
 
