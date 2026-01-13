@@ -1,10 +1,13 @@
 package org.example;
 
+import org.example.handlers.CustomHandler1;
 import org.example.services.appService1;
 
+import java.io.IOException;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.logging.ConsoleHandler;
+import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -14,7 +17,7 @@ public class Main {
     private static final Logger myLogger0 = Logger.getLogger("org.example");
     private static final Logger myLogger1 = Logger.getLogger("org.example.services");
 
-    static void main() {
+    static void main() throws IOException {
         // ======================== элементарное протоколирование
 
         // Logger.getGlobal().setLevel(Level.OFF); // OFF - запрет логирования в корне программы
@@ -48,7 +51,7 @@ public class Main {
 
         // загрузка на другой локали
 
-        Locale enLocale = new Locale("en", "EN"); // описание локали для английского
+        /*Locale enLocale = new Locale("en", "EN"); // описание локали для английского
 
         ResourceBundle bundle = ResourceBundle.getBundle( // описаниение комплекта ресурсов под локаль enLocale
                 "org.example.logmsg", // имя комплекта
@@ -58,6 +61,32 @@ public class Main {
         Logger logger = Logger.getLogger("org.example"); // создание регистратора для пакета org.example
         logger.setResourceBundle(bundle); // установка описанного выше комплекта на этот регистратор
 
-        logger.log(Level.INFO, "msg.info", "appServ"); // протокольная запись ИНФО сообщения по коду msg.info с добавкой appServ в {0}
+        logger.log(Level.INFO, "msg.info", "appServ"); // протокольная запись ИНФО сообщения по коду msg.info с добавкой appServ в {0}*/
+
+        //======================= тестирование логирования в файл
+
+        FileHandler fileHandler = new FileHandler("log", 500,10,true); // определение обработчика в файл
+                                               // 500 - предельный объём файла логов в байтах
+                                               // 10 - количество файлов логов в списке ротации
+                                               // true - разрешение добавления новых записей к старым при перезапуске
+                                               // если false - при перезапуске старые удаляются, новые записываются
+        fileHandler.setLevel(Level.FINEST);
+
+        myLogger1.setLevel(Level.FINEST);
+        myLogger1.addHandler(fileHandler);
+        myLogger1.setUseParentHandlers(false);
+
+        // см точку входа и выхода в методе класса
+
+        appService1.makeLog((myLogger, msgApp) -> {
+            myLogger.severe(String.format("severe msg from %s", msgApp));
+            myLogger.warning(String.format("warning msg from %s", msgApp));
+            myLogger.info(String.format("info msg from %s", msgApp));
+            myLogger.config(String.format("config msg from %s", msgApp));
+            myLogger.fine(String.format("fine msg from %s", msgApp));
+            myLogger.finer(String.format("finer msg from %s", msgApp));
+            myLogger.finest(String.format("finest msg from %s", msgApp));
+        }, myLogger1, "appService1");
+
     }
 }
