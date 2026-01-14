@@ -14,4 +14,6 @@ public class Entity implements Comparable<Entity>{
     public Entity(){
         this(0);
     }
+
+    public int getNum(){ return num; }
 }
