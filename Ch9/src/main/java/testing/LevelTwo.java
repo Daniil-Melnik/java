@@ -13,6 +13,8 @@
 - - выполнить перхват исключения модификации списка LinkedList
 */
 
+package testing;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;

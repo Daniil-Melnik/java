@@ -1,18 +1,18 @@
+package testing;
+
 /*1. Замерить и сравнить работу LinkedList и ArrayList
 - создать объекты спиков, набить каждый по 100_000 элементов
 - выполнить произвольный доступ в середине
 - выполнить перебор с печатью через произвольный доступ
 - выполнить перебор через итератор с печатью*/
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Properties;
+
+import testing.utils.PrintUtils;
 
 
 public class LevelOne {
@@ -68,30 +68,13 @@ public class LevelOne {
         timeStamp6 = System.currentTimeMillis(); // отсечение печати списочного массива через итератор
 
         try {
-            printResultsToFile(); // печать временнЫх результатов работы участков программы
+            PrintUtils.printResultsToFile(createOutTable()); // печать временнЫх результатов работы участков программы
         } catch (IOException e) {
             System.out.println("Ошибка печати в файл!\n"  + e.getMessage());
         }
     }
 
-    private static  String getFileOutPath(){ // получение пути к файлу для печати выходных данных
-        String result = "";
-
-        Properties props = new Properties(); // объект свойств программы
-        try {
-            props.load(new FileInputStream("program.properties")); // загрузка свойств из файла
-            result = props.getProperty("out.filePath"); // извлечение свойства с строкой пути из объекта свойств
-        } catch (IOException e) {
-            System.out.println("Ошибка получения пути к файлу вывода \n" + e.getMessage());
-        }
-        
-        return result;
-    }
-
-    private static File getOutFile(){ // получение объекта файла по имени
-        File outFile = new File(getFileOutPath() + "\\out1.txt");
-        return outFile;
-    }
+    
 
     private static String createOutTable(){ // формирование текста для печати в файл
 
@@ -116,11 +99,5 @@ public class LevelOne {
                 diffIterArray,
                 diffIterLinked
         );
-    }
-
-    private static void printResultsToFile() throws IOException{
-        try (FileWriter writer = new FileWriter(getOutFile())) { // try с ресурсами для печати в файл
-            writer.write(createOutTable());
-        }
     }
 }
