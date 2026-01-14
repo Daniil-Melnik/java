@@ -67,7 +67,7 @@ public class LevelThree {
         timeStamp6 = System.currentTimeMillis(); // отсечение встроенного поиска в списочном массиве
 
         try {
-            PrintUtils.printResultsToFile(createOutTable(), "\\out2_1.txt");
+            PrintUtils.printResultsToFile(createOutTable(), "\\out3.txt");
         } catch (IOException e) {
             System.out.println("Ошибка печати в файл! " + e.getMessage() + " " + e.getClass());
         }
