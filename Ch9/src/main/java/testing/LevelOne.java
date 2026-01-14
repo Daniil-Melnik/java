@@ -68,7 +68,7 @@ public class LevelOne {
         timeStamp6 = System.currentTimeMillis(); // отсечение печати списочного массива через итератор
 
         try {
-            PrintUtils.printResultsToFile(createOutTable()); // печать временнЫх результатов работы участков программы
+            PrintUtils.printResultsToFile(createOutTable(), "\\out1.txt"); // печать временнЫх результатов работы участков программы
         } catch (IOException e) {
             System.out.println("Ошибка печати в файл!\n"  + e.getMessage());
         }
