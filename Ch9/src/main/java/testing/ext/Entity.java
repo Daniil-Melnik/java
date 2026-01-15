@@ -16,4 +16,9 @@ public class Entity implements Comparable<Entity>{
     }
 
     public int getNum(){ return num; }
+
+    @Override
+    public String toString() {
+        return num + "";
+    }
 }
