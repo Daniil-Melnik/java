@@ -16,7 +16,11 @@
   + smth.putIfAbsent(word, 0) -- надёжный
     smth.put(word, smth.get(word)+1)
 + проверить надёжный метод на большых отображениях с замером времени
-- проверить метод
+- проверить метод merge()
+- проверить compute()
+- проверить метод computeIfPresent()
+- проверить метод computeIfAbsent()
+- проверить метод replaceAll()
 */
 
 package testing;
@@ -137,6 +141,7 @@ public class LevelSeven {
         timeStamp7 = System.currentTimeMillis();
 
         // == тсетирование спец. методов на множествах
+        // merge()
 
         map1.put("1", "val_1");
         map1.put("3", "val_3");
@@ -166,6 +171,37 @@ public class LevelSeven {
         map3.merge("35", "MMM", (v1, v2) -> v1 + v2);
 
         System.out.println(map3);
+
+        // compute()
+
+        map3.compute("35", (k, v) -> v+k);
+        System.out.println(map3.get("35"));
+        // берёт объект по ключу "35", потом передаёт пару ключ-значение в функцию,
+        // где она преобразуется и устанавливается в "35"
+
+        map1.forEach((key, value) ->
+                map1.compute(key, (k, v) -> v + "*"));
+
+        System.out.println(map1);
+
+        // computeIfPresent()
+
+        map1.computeIfPresent("KKK", (k, v) -> "TEST"); // KKK нет, тогда ничего не делать
+        System.out.println(map1); // {1=val_1*, 3=val_3*, 5=val_5*}
+
+        map1.computeIfPresent("1", (k, v) -> "TEST"); // "1" есть - меняем значение по "1" на TEST
+        System.out.println(map1); // {1=TEST, 3=val_3*, 5=val_5*}
+
+        // computeIfAbsent()
+
+        map1.computeIfAbsent("KKK", (k) -> "TEST"); // т. к. ключа ККК нет - в него добавляется "TEST"
+        System.out.println(map1); // {1=TEST, 3=val_3*, 5=val_5*, KKK=TEST}
+
+        map1.computeIfAbsent("1", (k) -> "GGG");
+        System.out.println(map1); // {1=TEST, 3=val_3*, 5=val_5*, KKK=TEST}
+
+        map2.replaceAll((key, value) -> "REPLACED"); // заменить все на что-то
+        System.out.println(map2);
 
         /*try {
             PrintUtils.printResultsToFile(createOutTable(), "\\out7.txt");
