@@ -1,22 +1,199 @@
 /*
 6. Сравнить работу TreeMap и HashMap
-- создать по два экземпляра (по одному с 10 элементами и по одному с 500*10^3) отображений
-  - TreeMap - простой конструктор
-  - HashMap - конструктор с объёмом и коэффициентом заполнения
-- заполнить отображения значениями HasableEntity (HashMap с у четом коэффициента заполнения),
-  замерить время выполнения
-- выполнить вывод каждого малого отображения в консоль через forEach()
-- замерить время нахождения элемента по ключу в обоих больших через get(), getOrDefault()
-- проверить существование ключа в отображении через containsKey()
-- замерить время обновления записи в отображении тремя способами
-  - smth.put(word, newEntity) - можно ли так?
-  - smth.put(word, smth.get(word) + 1)
-  - smth.put(word, smth.getOrDefault(word) + 1)
-  - smth.putIfAbsent(word, 0)
++ создать по два экземпляра (по одному с 10 элементами и по одному с 500*10^3) отображений
+  + TreeMap - простой конструктор
+  + HashMap - конструктор с объёмом и коэффициентом заполнения
++ заполнить отображения значениями HasableEntity (HashMap с у четом коэффициента заполнения),
+  замерить время выполнения)
++ выполнить вывод каждого малого отображения в консоль через forEach()
++ замерить время нахождения элемента по ключу в обоих больших через get()
++ проверить на отсутсвующих значениях getOrDefault()
++ проверить существование ключа в отображении через containsKey()
++ проверить методы обновления записей по ключу на малых отображениях
+  + smth.put(word, newEntity) - можно ли так?
+  + smth.put(word, smth.get(word) + 1)
+  + smth.put(word, smth.getOrDefault(word) + 1)
+  + smth.putIfAbsent(word, 0) -- надёжный
     smth.put(word, smth.get(word)+1)
++ проверить надёжный метод на большых отображениях с замером времени
+- проверить метод
 */
 
 package testing;
 
+import testing.ext.HashableEntity;
+import testing.utils.PrintUtils;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.TreeMap;
+
 public class LevelSeven {
+
+    private static final int SIZE_BIG = 500_000;
+    private static final int SIZE_SMALL = 10;
+
+    private static long timeStamp0;
+    private static long timeStamp1;
+    private static long timeStamp2;
+    private static long timeStamp3;
+    private static long timeStamp4;
+    private static long timeStamp5;
+    private static long timeStamp6;
+    private static long timeStamp7;
+
+    public static void main(String[] args){
+        HashMap<String, HashableEntity> hashMapBig = new HashMap<>(50, 0.75F);
+        TreeMap<String, HashableEntity> treeMapBig = new TreeMap<>();
+
+        HashMap<String, HashableEntity> hashMapSmall = new HashMap<>();
+        TreeMap<String, HashableEntity> treeMapSmall = new TreeMap<>();
+
+        HashMap<String, String> map1 = new HashMap<>();
+        HashMap<String, String> map2 = new HashMap<>();
+        HashMap<String, String> map3 = new HashMap<>();
+
+        timeStamp0 = System.currentTimeMillis();
+
+        for (int i = 0; i < SIZE_BIG; i++){
+            hashMapBig.put(String.format("key_%d", i), new HashableEntity(i, String.format("str_%d", i)));
+        }
+
+        timeStamp1 = System.currentTimeMillis();
+
+        for (int i = 0; i < SIZE_BIG; i++){
+            treeMapBig.put(String.format("key_%d", i), new HashableEntity(i, String.format("str_%d", i)));
+        }
+
+        timeStamp2 = System.currentTimeMillis();
+
+        for (int i = 0; i < SIZE_SMALL; i++){
+            hashMapSmall.put(String.format("key_%d", i), new HashableEntity(i, String.format("str_%d", i)));
+            treeMapSmall.put(String.format("key_%d", i), new HashableEntity(i, String.format("str_%d", i)));
+        }
+
+        hashMapSmall.forEach((k ,v) -> System.out.println(k + " - " + v.toString()));
+
+        System.out.println();
+
+        treeMapSmall.forEach((k ,v) -> System.out.println(k + " - " + v.toString()));
+
+        timeStamp3 = System.currentTimeMillis();
+
+        System.out.println(hashMapBig.get("key_250000"));
+
+        timeStamp4 = System.currentTimeMillis();
+
+        System.out.println(treeMapBig.get("key_250000"));
+
+        timeStamp5 = System.currentTimeMillis();
+
+        System.out.println(hashMapSmall.get("key_20")); // вернёт null, так как по такому ключу ничего не хранится
+        System.out.println(hashMapSmall.getOrDefault("key_20", new HashableEntity())); // вернёт определённое на такой
+                                                                                            // случай значение 500
+
+        // == проверка простого (1) обновления записи
+
+        int keyN = 2;
+
+        System.out.println("\nПРОСТОЕ ОБНОВЛЕНИЕ С ПОЛНОЙ ЗАМЕНОЙ");
+        System.out.println(hashMapSmall.get("key_2").toString());
+        hashMapSmall.put("key_2", new HashableEntity(89, "new_str"));
+        System.out.println(hashMapSmall.get("key_2").toString());
+
+        System.out.println("\nПРОСТОЕ ОБНОВЛЕНИЕ С ОБНОВЛЕНИЕМ ЭКЗЕМПЛЯРА");
+        System.out.println(hashMapSmall.get("key_2").toString());
+        hashMapSmall.put("key_2", hashMapSmall.get("key_2").setStr("str_2"));
+        System.out.println(hashMapSmall.get("key_2").toString());
+
+        // == проверка обновления с контролем существования (2)
+
+        System.out.println("\nОБНОВЛЕНИЕ С ПРОВЕРКОЙ");
+
+        try {
+            hashMapSmall.put("key_25", hashMapSmall.get("key_25").setStr("str_25"));
+        } catch (NullPointerException e){
+            System.out.println("Ошибка нулевого значения! По такому ключу ничего нет, чего нет - то обновить нельзя!");
+        }
+
+        hashMapSmall.put("key_25", hashMapSmall.getOrDefault("key_25", new HashableEntity(25, "str")).setStr("str_25"));
+
+        System.out.println(hashMapSmall.get("key_25").toString());
+
+        // проверка обновления с предварительной установкой значения, если такого не существует (3)
+
+        System.out.println("\nОБНОВЛЕНИЕ С ПРЕДВАРИТЕЛЬНОЙ УСТАНОВКОЙ");
+
+        treeMapSmall.putIfAbsent("key_26", new HashableEntity(26, "str_0"));
+        System.out.println(treeMapSmall.get("key_26"));
+        treeMapSmall.put("key_26", treeMapSmall.get("key_26").setStr("str_26"));
+        System.out.println(treeMapSmall.get("key_26"));
+
+        timeStamp6 = System.currentTimeMillis();
+
+        treeMapBig.putIfAbsent("key_2625222", new HashableEntity(26, "str_0"));
+        treeMapBig.put("key_2625222", treeMapBig.get("key_2625222").setStr("str_2625222"));
+
+        timeStamp7 = System.currentTimeMillis();
+
+        // == тсетирование спец. методов на множествах
+
+        map1.put("1", "val_1");
+        map1.put("3", "val_3");
+        map1.put("5", "val_5");
+
+        map2.put("1", "val_2");
+        map2.put("3", "val_4");
+        map2.put("5", "val_6");
+        map2.put("7", "val_7");
+
+        map3.putAll(map1);
+
+        System.out.println(map3);
+
+        map2.forEach((key, value) ->
+                map3.merge(key, value, (v3, v2) -> v3 + v2)
+            );
+
+        // то есть: к map3 пробуют прибавиться все элементы map2 проходя через условие выбора/обработки значений обоих кандидатов: v3 из map3 и v2 из map2
+
+        System.out.println(map3);
+
+        map3.merge("1", "NNN", (v1, v2) -> v1 + v2);
+
+        System.out.println(map3);
+
+        map3.merge("35", "MMM", (v1, v2) -> v1 + v2);
+
+        System.out.println(map3);
+
+        /*try {
+            PrintUtils.printResultsToFile(createOutTable(), "\\out7.txt");
+        } catch (IOException e) {
+            System.out.println("Ошибка печати в файл! " + e.getMessage() + " " + e.getClass());
+        }*/
+    }
+
+    private static String createOutTable(){
+
+        long diffInitHash = timeStamp1-timeStamp0; // длительность заполнения хеш-отображения
+        long diffInitTree = timeStamp2-timeStamp1; // длительность заполнения древовидного отображения
+        long diffFindMiddleHash = timeStamp4 - timeStamp3; // длительность поиска середины Хэш
+        long diffFindMeddleTree = timeStamp5 - timeStamp4; // длительность поиска середины Дерево
+        long diffPutIntoBig = timeStamp7 - timeStamp6;
+
+        return String.format(
+                        "заполнить - Hash - %d\n" +
+                        "заполнить - Tree - %d\n" +
+                                "найти посередине Hash - %d\n" +
+                "найти посередине Tree - %d\n" +
+                "вставить новый в большой - %d\n",
+
+                diffInitHash,
+                diffInitTree,
+                diffFindMiddleHash,
+                diffFindMeddleTree,
+                diffPutIntoBig
+        );
+    }
 }

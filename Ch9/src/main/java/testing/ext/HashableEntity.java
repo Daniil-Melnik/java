@@ -13,6 +13,24 @@ public class HashableEntity extends Entity{
         this(0, "");
     }
 
+    public HashableEntity setStr(String str) {
+        this.str = str;
+
+        return this;
+    }
+
+    public int getNum(){
+        return super.getNum();
+    }
+
+    public void setNum(int n){
+        super.setNum(n);
+    }
+
+    public void plusToNum(int aN){
+        this.setNum(super.getNum() + aN);
+    }
+
     // РАЗНЫЕ ПРИНЦИПЫ ПОИСКА (из-за разной структуры хранения)
     // hashCode() -> equals() обязательны для поиска в HashSet (хештаблица) - оба метода должны выдавать эквивалентные друг другу результаты
     // compareTo() - обязателен для поиска в TreeSet (хеш-дерево)

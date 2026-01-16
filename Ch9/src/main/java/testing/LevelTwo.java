@@ -23,7 +23,7 @@ import java.util.ListIterator;
 import java.util.StringJoiner;
 
 public class LevelTwo {
-    public static void main(){
+    public static void main(String[] args){
         List<String> linkedList = new LinkedList<>(List.of("1", "2", "3", "4", "5", "6", "7", "8","9", "10")); // формировнаие изменяемых списков через маленькие 
         List<String> arrayList = new ArrayList<>(List.of("1", "2", "3", "4", "5", "6", "7"));   // неизменяемые коллекции (не более 10 элементов)
 
