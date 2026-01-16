@@ -16,11 +16,11 @@
   + smth.putIfAbsent(word, 0) -- надёжный
     smth.put(word, smth.get(word)+1)
 + проверить надёжный метод на большых отображениях с замером времени
-- проверить метод merge()
-- проверить compute()
-- проверить метод computeIfPresent()
-- проверить метод computeIfAbsent()
-- проверить метод replaceAll()
++ проверить метод merge()
++ проверить compute()
++ проверить метод computeIfPresent()
++ проверить метод computeIfAbsent()
++ проверить метод replaceAll()
 */
 
 package testing;
