@@ -3,6 +3,9 @@
 + создать малое отображение из 10-ти элементов
 + распечатать представления через keyset(), values(), entrySet()
 + удалить из представления, соответсвенно ключ, значение, пару и посмотреть в срввнении отображение и представление
+
+- проверить равенство одинаковых значений по разным ключам
+- создать отображение идентинчности, проверить равенство в нём
 */
 
 // представление - коллекция на основе отображения
@@ -15,6 +18,8 @@ public class LevelEight {
     private static final int SIZE = 10;
     public static void main(String[] args){
         HashMap<String, String> hashMapSmall = new HashMap<>();
+
+        IdentityHashMap<String, String> identityHashMap = new IdentityHashMap<>();
 
         for (int i = 0; i < SIZE; i++){
             hashMapSmall.put("key_" + i, "val_" + i);
@@ -57,5 +62,19 @@ public class LevelEight {
         System.out.println(entries); // пара исчезнет из коллекции
         System.out.println(hashMapSmall); // пара исчезнет из отображения
 
+        System.out.println("ПРОВЕРКА РАВЕНТСВА В ОБЫЧНОМ ОТОБРАЖЕНИИ");
+
+        hashMapSmall.put("key_9a", "val_9");
+        System.out.println(hashMapSmall.get("key_9").equals(hashMapSmall.get("key_9a"))); // проверка равенства значений по двум ключам true
+        System.out.println(hashMapSmall.get("key_9").equals(hashMapSmall.get("key_8"))); // проверка значение по двум ключам (значения разные)
+
+        System.out.println("ПРОВЕРКА РАВЕНТСВА В ОТОБРАЖЕНИИ ИДЕНТИЧНОСТИ");
+
+        for (int i = 0; i < SIZE; i++){
+            identityHashMap.put("iKey_" + i, "iVal_" + i);
+        }
+        identityHashMap.put("iKey_9a", "iVal_9");
+
+        System.out.println(identityHashMap.get("key_9") == (identityHashMap.get("key_9a"))); // сравнение через == , в отличие от обычного отображение
     }
 }
