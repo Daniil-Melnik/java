@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE preferences SYSTEM "http://java.sun.com/dtd/preferences.dtd">
+<preferences EXTERNAL_XML_VERSION="1.0">
+  <root type="user">
+    <map>
+      <entry key="JetBrains.UserIdOnMachine" value="5b5e55d0-cb93-49a5-a539-f1dfc0394ec3"/>
+    </map>
+    <node name="jetbrains">
+      <map>
+        <entry key="device_id" value="1111251e68532b5-a830-491d-ada0-5de126db1d93"/>
+        <entry key="feature_usage_event_log_salt" value="uW8C4xHcJZFMOTbzg/2hUeum4la8K+HyXpezGKixR4s="/>
+        <entry key="ea_device_id" value="1111251ec39a279-3ed7-489a-be9f-323da061cdfa"/>
+        <entry key="user_id_on_machine" value="5b5e55d0-cb93-49a5-a539-f1dfc0394ec3"/>
+        <entry key="marketplacedownloads_device_id" value="1111251d7f6fa97-61be-4fb6-9dfe-5663209e3ac6"/>
+        <entry key="packagechecker_device_id" value="11112511da1d26d-96ab-4b4e-b08b-2fa0d4416f92"/>
+      </map>
+      <node name="ic">
+        <map/>
+        <node name="252">
+          <map/>
+          <node name="noncommerciallicense">
+            <map/>
+          </node>
+        </node>
+        <node name="csat">
+          <map/>
+          <node name="survey">
+            <map/>
+            <node name="last">
+              <map/>
+              <node name="feedback">
+                <map/>
+              </node>
+              <node name="notification">
+                <map/>
+              </node>
+            </node>
+          </node>
+          <node name="user">
+            <map/>
+            <node name="created">
+              <map>
+                <entry key="at" value="2025-11-11"/>
+              </map>
+            </node>
+          </node>
+        </node>
+      </node>
+      <node name="jetprofile">
+        <map/>
+        <node name="asset">
+          <map/>
+        </node>
+      </node>
+      <node name="privacy_policy">
+        <map>
+          <entry key="euacommunity_accepted_version" value="1.0"/>
+        </map>
+      </node>
+      <node name="region">
+        <map/>
+      </node>
+    </node>
+    <node name="testing">
+      <node name="levelTwo">
+        <map>
+          <entry key="width" value="500"/>
+          <entry key="height" value="350"/>
+          <entry key="resizeble" value="true"/>
+          <entry key="title" value="LevelTwo"/>
+          <entry key="iconFile" value="/images/100.png"/>
+        </map>
+      </node>
+    </node>
+  </root>
+</preferences>
