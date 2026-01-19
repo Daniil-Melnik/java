@@ -13,10 +13,13 @@ package testing;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.font.TextAttribute;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
-import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.prefs.Preferences;
 
@@ -87,10 +90,15 @@ class ComponentTwo extends JComponent{
     public void paintComponent(Graphics g) {
         Graphics2D g2 = (Graphics2D) g;
 
+        System.out.println(Arrays.toString(GraphicsEnvironment.getLocalGraphicsEnvironment()
+                .getAvailableFontFamilyNames()));
+
         float lextX = 100.0F;
         float lextY = 80.0F;
         float height = 190.0F;
         float width = 300.0F;
+
+        g2.setStroke(new BasicStroke(4));
 
         g2.setColor(Color.BLUE);
         Rectangle2D rectangle = new Rectangle2D.Float(lextX, lextY, width, height);
@@ -99,6 +107,8 @@ class ComponentTwo extends JComponent{
         g2.setColor(Color.RED);
         Ellipse2D ellipse = new Ellipse2D.Double(lextX, lextY, width, height);
         g2.draw(ellipse);
+        g2.setColor(new Color(255, 255, 255));
+        g2.fill(ellipse);
 
         g2.setColor(Color.CYAN);
         Line2D line = new Line2D.Double(
@@ -108,9 +118,33 @@ class ComponentTwo extends JComponent{
                 rectangle.getMaxY());
         g2.draw(line);
 
+        drawLines(g2, (int) rectangle.getMinX(), (int) rectangle.getMaxY());
+
+        System.out.println();
+    }
+
+    private static void drawLines( Graphics g, int startX, int startY){
+        Graphics2D g2 = (Graphics2D) g;
+
+        Font [] fonts = new Font[4];
+        Map<TextAttribute, Object> attribs = new HashMap<>();
+
+        fonts[0] = new Font("SansSerif", Font.BOLD, 14);
+
+        attribs.put(TextAttribute.FAMILY, "Dialog");
+        attribs.put(TextAttribute.SIZE, 16);
+        attribs.put(TextAttribute.WEIGHT, TextAttribute.WEIGHT_BOLD);
+        attribs.put(TextAttribute.POSTURE, TextAttribute.POSTURE_OBLIQUE);
+        attribs.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
+
+        fonts[1] = new Font(attribs);
+
         g2.setColor(new Color(3, 168, 0));
-        g2.setFont(new Font("Arial", Font.BOLD, 24));
-        g2.drawString("Фигуры", (int) rectangle.getMinX(), (int) (rectangle.getMaxY() + 25.0F));
+        g2.setFont(fonts[0]);
+        g2.drawString("Фигуры", startX, startY + 25.0F);
+
+        g2.setFont(fonts[1]);
+        g2.drawString("Фигуры", startX, startY + 50.0F);
     }
 
     @Override
