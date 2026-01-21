@@ -18,10 +18,13 @@ import java.awt.font.TextAttribute;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
 public class LevelTwo {
@@ -29,16 +32,16 @@ public class LevelTwo {
     public static void main(String [] args){
         Preferences root = Preferences.userRoot();
 
-        Preferences node2 = root.node("/testing/levelTwo");
+        Preferences node2 = root.node("/testing/levelFour");
 
         // формирование локального дерева настроек preferencies
         // С экспортом в файл preferencies.xml
 
-        // node2.put("height", "350");
-        /*node2.put("width", "500");
+        /*node2.put("height", "150");
+        node2.put("width", "500");
         node2.put("resizeble", "false");
-        node2.put("title", "LevelTwo");
-        node2.put("iconFile", "/images/100.png");
+        node2.put("title", "LevelFour");
+        node2.put("iconFile", "/images/4.png");
 
         try {
             String userHome = System.getProperty("user.home");

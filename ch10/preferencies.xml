@@ -62,11 +62,29 @@
       </node>
     </node>
     <node name="testing">
+      <map>
+        <entry key="filename" value="fn"/>
+      </map>
+      <node name="LevelTwo">
+        <map>
+          <entry key="width" value="500"/>
+          <entry key="height" value="350"/>
+        </map>
+      </node>
+      <node name="levelFour">
+        <map>
+          <entry key="height" value="150"/>
+          <entry key="width" value="500"/>
+          <entry key="resizeble" value="false"/>
+          <entry key="title" value="LevelFour"/>
+          <entry key="iconFile" value="/images/4.png"/>
+        </map>
+      </node>
       <node name="levelTwo">
         <map>
           <entry key="width" value="500"/>
           <entry key="height" value="350"/>
-          <entry key="resizeble" value="true"/>
+          <entry key="resizeble" value="350"/>
           <entry key="title" value="LevelTwo"/>
           <entry key="iconFile" value="/images/100.png"/>
         </map>

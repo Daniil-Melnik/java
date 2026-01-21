@@ -154,7 +154,7 @@ class WindowTerminator extends WindowAdapter{ // адаптер для окна
     @Override
     public void windowOpened(WindowEvent e){ // перехват открытия окна
         System.out.println("Window opened!");
-        JOptionPane.showMessageDialog(e.getWindow(), "Окно открыто!");
+        // JOptionPane.showMessageDialog(e.getWindow(), "Окно открыто!");
     }
 }
 
