@@ -40,7 +40,9 @@ class FrameSeven extends JFrame{
         add(component);
 
         JButton lBtn = new JButton(new PhotoAction(component, "далее", "Следующее фото", false));
+                                                       // экранная кнопка для следующего фото (через Action)
         JButton rBtn = new JButton(new PhotoAction(component, "назад", "Предыдущее фото", true));
+                                                       // экранная кнопка для предыдущего фото (через Action)
 
         lBtn.setBounds(502, 625, 492, 43);
         rBtn.setBounds(10, 625, 492, 43);
@@ -51,54 +53,56 @@ class FrameSeven extends JFrame{
 }
 
 class ComponentSeven extends JComponent{
-    String fileName;
+    String fileName; // хранение имени файла с текущей фотографией
 
     public ComponentSeven(){
-        fileName = "";
-        InputMap imap = getInputMap(WHEN_IN_FOCUSED_WINDOW);
-        ActionMap amap = getActionMap();
+        fileName = ""; // первоначально область под фото пустая
 
-        imap.put(KeyStroke.getKeyStroke("RIGHT"), "next");
-        imap.put(KeyStroke.getKeyStroke("LEFT"), "previous");
+        InputMap imap = getInputMap(WHEN_IN_FOCUSED_WINDOW); // получение отображения ввода для компонента
+        ActionMap amap = getActionMap(); // получение отображения действий для компонента
 
-        amap.put("next", new PhotoAction(this, false));
-        amap.put("previous", new PhotoAction(this, true));
+        imap.put(KeyStroke.getKeyStroke("RIGHT"), "next"); // привязка п-стрелки кнопки на ввод
+                                                                          // по ключу next
+        imap.put(KeyStroke.getKeyStroke("LEFT"), "previous"); // привязка  кнопки на ввод
+                                                                             // по ключу previous
+
+        amap.put("next", new PhotoAction(this, false)); // привязка деймтвия выбора следующего по next
+        amap.put("previous", new PhotoAction(this, true)); // привязка деймтвия выбора предыдущего по previous
     }
 
     @Override
     public void paintComponent(Graphics g) {
-        float k;
+        float k; // коэффициент сжатия изображения
 
-        Image image = new ImageIcon(
+        Image image = new ImageIcon( // получение текущей фотографии по пути их параметра fileName
                 Objects.requireNonNull(
                         this.getClass().getResource(String.format("/photos/%s", fileName))
                 )).getImage();
 
-        k = (float) image.getWidth(null) / 980;
-        int imgW = (int) (image.getWidth(null) / k);
-        int imgH = (int) (image.getHeight(null) / k);
-        int imgX = (FrameSeven.WIDTH - imgW) / 2;
+        k = (float) image.getWidth(null) / 980; // коэффициент - пропорция по ширине
+        int imgW = (int) (image.getWidth(null) / k); // высота фото для окна по коэффициенту
+        int imgH = (int) (image.getHeight(null) / k); // ширина фото для окна по коэффициенту
+        int imgX = (FrameSeven.WIDTH - imgW) / 2; // расчёт координаты X для фото
 
-        System.out.println(imgH + " " + imgW);
-
-        g.drawImage(image, imgX, 0, imgW, imgH, null);
-        g.setFont(new Font("Arial", Font.BOLD, 15));
-        g.setColor(Color.BLACK);
-        g.drawString(fileName, imgX, 600);
+        g.drawImage(image, imgX, 0, imgW, imgH, null); // отрисовка изображения
+        g.setFont(new Font("Arial", Font.BOLD, 15)); // шрифт для названия фото
+        g.setColor(Color.BLACK); // цвет для названия фото
+        g.drawString(fileName, imgX, 600); // отрисовка названия фото
     }
 
-    public void setFileName(String fN){
+    public void setFileName(String fN){ // метод установки нового имени текущего фото
         fileName = fN;
     }
 }
 
-class PhotoAction extends AbstractAction{
-    ComponentSeven component;
+class PhotoAction extends AbstractAction{ // класс-описание-перехватчик действия по смене фото
+    ComponentSeven component; // компонент для которого экземпляр перехватчика
     private static String [] fileNames = {"Ozerki_5.jpg", "Ligovsky_prospect_24.jpg", "Leninsky_prospect_4.jpg", "Electrosila_15.jpg"};
-    private int i;
-    private boolean revers;
+                           // параметр класса - массив имён файлов с фото
+    private int i; // счётчик номера текущего фото
+    private boolean revers; // параметр направления перелистывания
 
-    public PhotoAction(ComponentSeven c, String n, String d, boolean r){
+    public PhotoAction(ComponentSeven c, String n, String d, boolean r){ // конструктор под экранную кнопку
         component = c;
         putValue(Action.NAME, n);
         putValue(Action.SHORT_DESCRIPTION, d);
@@ -106,7 +110,7 @@ class PhotoAction extends AbstractAction{
         revers = r;
     }
 
-    public PhotoAction(ComponentSeven c, boolean r){
+    public PhotoAction(ComponentSeven c, boolean r){ // конструктор под привязку к клавишам
         component = c;
         putValue(Action.NAME, "default");
         putValue(Action.SHORT_DESCRIPTION, "default");
@@ -116,8 +120,9 @@ class PhotoAction extends AbstractAction{
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        component.setFileName(fileNames[i % fileNames.length]);
-        i = revers ? i == 0 ? i = fileNames.length - 1 : i - 1 : i + 1;
-        component.repaint();
+        component.setFileName(fileNames[i % fileNames.length]); // установка нового текущего фото в компонент
+        i = revers ? i == 0 ? fileNames.length - 1 : i - 1 : i + 1; // расчёт нового индекса для следующего
+                                                                    // (после этого) фото
+        component.repaint(); // перерисовка компонента
     }
 }
