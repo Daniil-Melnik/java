@@ -31,7 +31,7 @@ class FrameSix extends JFrame{
         setLayout(null);
         setSize(w, h);
         setTitle("LevelSix");
-        addWindowListener(new WindowTerminator());
+        addWindowListener(new LevelThree.WindowTerminator());
 
         ComponentSix component = new ComponentSix(0, 0);
         component.setBounds(10, 10, 465, 240);

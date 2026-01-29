@@ -35,7 +35,7 @@ class FrameEight extends JFrame{
         setLayout(null);
         setSize(LevelEight.WIDTH, LevelEight.HEIGHT);
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-        addWindowListener(new WindowTerminator());
+        addWindowListener(new LevelThree.WindowTerminator()); // внутренний класс в LevelThree
         setTitle("LevelEight");
 
         ComponentEight component = new ComponentEight();

@@ -44,7 +44,7 @@ class FrameFour extends JFrame{
 
         setSize(width, height);
 
-        addWindowListener(new WindowTerminator()); // определён как внутренний класс в LevelThree
+        addWindowListener(new LevelThree.WindowTerminator()); // определён как внутренний класс в LevelThree
         setTitle(node.get("title", "default"));
 
         setIconImage(new ImageIcon(Objects.requireNonNull(

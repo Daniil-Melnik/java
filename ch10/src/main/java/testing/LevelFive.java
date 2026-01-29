@@ -41,7 +41,7 @@ class FrameFive extends JFrame{
     public FrameFive(int w, int h){ // фрейм приложения, принимает высоту и ширину
         setLayout(null);
         setSize(w, h);
-        addWindowListener(new WindowTerminator()); // установка перехватчика оконных событий
+        addWindowListener(new LevelThree.WindowTerminator()); // установка перехватчика оконных событий
         setTitle("LevelFive");
         setIconImage(new ImageIcon(
                 Objects.requireNonNull(

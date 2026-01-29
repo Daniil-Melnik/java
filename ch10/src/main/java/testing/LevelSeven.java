@@ -32,7 +32,7 @@ class FrameSeven extends JFrame{
         setSize(WIDTH, HEIGHT);
         setLayout(null);
         setTitle("LevelSeven");
-        addWindowListener(new WindowTerminator());
+        addWindowListener(new LevelThree.WindowTerminator());
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 
         ComponentSeven component = new ComponentSeven();
