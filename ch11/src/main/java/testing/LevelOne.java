@@ -38,16 +38,47 @@ public class LevelOne {
 
             JMenuItem exitItem = new JMenuItem(new ExitAction());
             menuFile.add(exitItem);
+            menuFile.addSeparator();
             menuFile.add(new AboutAction());
 
+            menuLayout.add(new JMenuItem(new LayoutAction(null, false)));
+            menuLayout.add(new JMenuItem(new LayoutAction(null, true)));
+
             menuBar.add(menuFile);
+            menuBar.add(menuLayout);
 
             setJMenuBar(menuBar);
         }
     }
 
+    static class LayoutAction extends AbstractAction{
+        JComponent component;
+        boolean layoutType;
+
+        public LayoutAction(JComponent c, boolean t){
+            component = c;
+            layoutType = t;
+            putValue(Action.NAME, layoutType ? "Граничная" : "Поточная");
+        }
+
+        public LayoutAction(){
+            this(null, false);
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            try {
+                component.setLayout(layoutType ? new BorderLayout() : new FlowLayout());
+                component.revalidate();
+            } catch (NullPointerException ex) {
+                System.out.println(ex.getMessage());
+            }
+
+        }
+    }
+
     static class ExitAction extends AbstractAction{
-        
+
         public ExitAction(){
             putValue(Action.NAME, "Выход");
             putValue(Action.SHORT_DESCRIPTION, "Выйти из приложения");
