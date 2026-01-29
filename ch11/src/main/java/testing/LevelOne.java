@@ -32,30 +32,52 @@ public class LevelOne {
             setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 
             JMenuBar menuBar = new JMenuBar();
-            JMenuItem exitItem = new JMenuItem(new ExitAction(this));
-            menuBar.add(exitItem);
 
-            add(menuBar, BorderLayout.NORTH);
+            JMenu menuFile = new JMenu("Файл");
+            JMenu menuLayout = new JMenu("Компоновка");
+
+            JMenuItem exitItem = new JMenuItem(new ExitAction());
+            menuFile.add(exitItem);
+            menuFile.add(new AboutAction());
+
+            menuBar.add(menuFile);
+
+            setJMenuBar(menuBar);
         }
     }
 
     static class ExitAction extends AbstractAction{
-
-        FrameOneCh11 frame;
-
-        public ExitAction(FrameOneCh11 f){
-            frame = f;
+        
+        public ExitAction(){
             putValue(Action.NAME, "Выход");
             putValue(Action.SHORT_DESCRIPTION, "Выйти из приложения");
         }
 
         @Override
         public void actionPerformed(ActionEvent e) {
+
+            JFrame frame = (JFrame) SwingUtilities.getWindowAncestor((Component) e.getSource());
+
             if (JOptionPane.showConfirmDialog
                     (frame, "Выйти?", "Выход", JOptionPane.YES_NO_OPTION)
                     == JOptionPane.YES_OPTION){
                 System.exit(0);
             }
+        }
+    }
+
+    static class AboutAction extends AbstractAction{
+        public AboutAction(){
+            putValue(Action.NAME, "О программе");
+            putValue(Action.SHORT_DESCRIPTION, "Информация о программе");
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            JOptionPane.showMessageDialog(
+                    (JFrame) SwingUtilities.getWindowAncestor ((Component) e.getSource()),
+                    "Программа тестирования поточной и граничной компоновки"
+            );
         }
     }
 }
