@@ -52,7 +52,7 @@ public class LevelOne {
     }
 
     static class LayoutAction extends AbstractAction{
-        JComponent component;
+        JComponent component; // панель с двумя компонентами разной видимости
         boolean layoutType;
 
         public LayoutAction(JComponent c, boolean t){
