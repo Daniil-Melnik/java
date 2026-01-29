@@ -23,159 +23,160 @@ import java.util.Random;
 import java.util.prefs.Preferences;
 
 public class LevelFour {
-    public static void main(String[] args){
-        EventQueue.invokeLater(() ->{
+    public static void main(String[] args) {
+        EventQueue.invokeLater(() -> {
             FrameFour frame = new FrameFour();
             frame.setVisible(true);
         });
     }
-}
 
-class FrameFour extends JFrame{
-    private int width;
-    private int height;
 
-    public FrameFour(){
-        Preferences node = Preferences.userRoot().node("/testing/levelFour");
+    static class FrameFour extends JFrame {
+        private int width;
+        private int height;
 
-        setLayout(null);
-        width = node.getInt("width", 500); // принятие совйств из Preferences
-        height = node.getInt("height", 150);
+        public FrameFour() {
+            Preferences node = Preferences.userRoot().node("/testing/levelFour");
 
-        setSize(width, height);
+            setLayout(null);
+            width = node.getInt("width", 500); // принятие совйств из Preferences
+            height = node.getInt("height", 150);
 
-        addWindowListener(new LevelThree.WindowTerminator()); // определён как внутренний класс в LevelThree
-        setTitle(node.get("title", "default"));
+            setSize(width, height);
 
-        setIconImage(new ImageIcon(Objects.requireNonNull(
-                this.getClass().getResource(node.get("iconFile", "/images/default.png"))
-        )).getImage());
+            addWindowListener(new LevelThree.WindowTerminator()); // определён как внутренний класс в LevelThree
+            setTitle(node.get("title", "default"));
 
-        PanelFour panel = new PanelFour(width, height); // создание панели
-        panel.setBounds(0, 0, width, height); // установка положения и размеров панели во фрейме
+            setIconImage(new ImageIcon(Objects.requireNonNull(
+                    this.getClass().getResource(node.get("iconFile", "/images/default.png"))
+            )).getImage());
 
-        ActionMap aMap = panel.getActionMap(); // получение ОТОБРАЖЕНИЯ ДЕЙСТВИЙ
-        InputMap iMap = panel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW); // получение ОТОБРАЖЕНИЯ ПРИВЯЗКИ ВВОДА
-                                                                         // самая широкая область фокусировки
+            PanelFour panel = new PanelFour(width, height); // создание панели
+            panel.setBounds(0, 0, width, height); // установка положения и размеров панели во фрейме
 
-        iMap.put(KeyStroke.getKeyStroke("ctrl R"), "rAction"); // добавление нажатия Ctrl+R в отображение
-                                                                              // привязки ввода
-                                                                              // ключ rAction - связка между вводом и
-                                                                              // действием в aMap
+            ActionMap aMap = panel.getActionMap(); // получение ОТОБРАЖЕНИЯ ДЕЙСТВИЙ
+            InputMap iMap = panel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW); // получение ОТОБРАЖЕНИЯ ПРИВЯЗКИ ВВОДА
+            // самая широкая область фокусировки
 
-        iMap.put(KeyStroke.getKeyStroke("ctrl T"), "tAction"); // добавление нажатия Crtl+R
-                                                                               // ключ tAction - связка между вводом и
-                                                                               // действием в aMap
+            iMap.put(KeyStroke.getKeyStroke("ctrl R"), "rAction"); // добавление нажатия Ctrl+R в отображение
+            // привязки ввода
+            // ключ rAction - связка между вводом и
+            // действием в aMap
 
-        aMap.put("rAction", new TextAction(panel.getComponent(), true, "цвет", "поменять цвет"));
-                                                                // установка связки перехватчика и ключа для замены цвета
-                                                                // перехватчик -> ключ <- ввод
-        aMap.put("tAction", new TextAction(panel.getComponent(), false, "гарнитура", "поменять гарнитуру"));
-                                                                // установка связки перехватчика и ключа для замены гарнитуры
+            iMap.put(KeyStroke.getKeyStroke("ctrl T"), "tAction"); // добавление нажатия Crtl+R
+            // ключ tAction - связка между вводом и
+            // действием в aMap
 
-        add(panel);
-    }
-}
+            aMap.put("rAction", new TextAction(panel.getComponent(), true, "цвет", "поменять цвет"));
+            // установка связки перехватчика и ключа для замены цвета
+            // перехватчик -> ключ <- ввод
+            aMap.put("tAction", new TextAction(panel.getComponent(), false, "гарнитура", "поменять гарнитуру"));
+            // установка связки перехватчика и ключа для замены гарнитуры
 
-class TextAction extends AbstractAction{ // описание дествия (привязывается к клавишам и кнопкам)
-
-    private static String [] fontFamilyNames = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
-    // поле класса, содержащее все применимые в системе гарнитуры шрифтов
-
-    private ComponentFour sComponent; // ссылка на компонент, для которого создаётся экземпляр действия
-    private boolean mode; // true - действие для изменения цвета
-                          // false - действие для изменения гарнитуры
-
-    public TextAction(ComponentFour comp, boolean m, String name, String descr){ // конструктор действия
-        putValue(Action.NAME, name);
-        putValue(Action.SHORT_DESCRIPTION, descr);
-        sComponent = comp;
-        mode = m;
+            add(panel);
+        }
     }
 
-    @Override
-    public void actionPerformed(ActionEvent e) { // определение метода-перехватчика
-        Random random = new Random(); // генератор случайного
-        int iFn; // случайны целочисленные для параметров
-        int iR;
-        int iG;
-        int iB;
+    static class TextAction extends AbstractAction { // описание дествия (привязывается к клавишам и кнопкам)
 
-        if (mode){
-            iR = Math.abs(random.nextInt() % 255); // случайные компоненты цвета по RGB от 0 до 254
-            iG = Math.abs(random.nextInt() % 255);
-            iB = Math.abs(random.nextInt() % 255);
-            sComponent.setColor(new Color(iR, iG, iB)); // установка в компонент с шрифтом требуемого цвета
-                                                        // начертанияя букв
-        } else {
-            iFn = Math.abs(random.nextInt() % fontFamilyNames.length); // выбор гарнитуры шрифта по случайному индексу
+        private static String[] fontFamilyNames = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
+        // поле класса, содержащее все применимые в системе гарнитуры шрифтов
 
-            sComponent.setFontFamilyName(fontFamilyNames[iFn]); // установка в компонент с шрифтом требуемой
-                                                                // гарнитуры шрифта
+        private ComponentFour sComponent; // ссылка на компонент, для которого создаётся экземпляр действия
+        private boolean mode; // true - действие для изменения цвета
+        // false - действие для изменения гарнитуры
+
+        public TextAction(ComponentFour comp, boolean m, String name, String descr) { // конструктор действия
+            putValue(Action.NAME, name);
+            putValue(Action.SHORT_DESCRIPTION, descr);
+            sComponent = comp;
+            mode = m;
         }
 
-        sComponent.repaint(); // перерисовка компонента с изменёнными цветом или гарнитурой
-    }
-}
+        @Override
+        public void actionPerformed(ActionEvent e) { // определение метода-перехватчика
+            Random random = new Random(); // генератор случайного
+            int iFn; // случайны целочисленные для параметров
+            int iR;
+            int iG;
+            int iB;
 
-class PanelFour extends JPanel{ // панель-прокладка (?)
-    private ComponentFour component; // компонент, хранимый на экземпляре панели
+            if (mode) {
+                iR = Math.abs(random.nextInt() % 255); // случайные компоненты цвета по RGB от 0 до 254
+                iG = Math.abs(random.nextInt() % 255);
+                iB = Math.abs(random.nextInt() % 255);
+                sComponent.setColor(new Color(iR, iG, iB)); // установка в компонент с шрифтом требуемого цвета
+                // начертанияя букв
+            } else {
+                iFn = Math.abs(random.nextInt() % fontFamilyNames.length); // выбор гарнитуры шрифта по случайному индексу
 
-    public PanelFour(int w, int h){
-        setLayout(null);
-        component = new ComponentFour();
-        component.setBounds(0, 0, w, h-50); // добавление на панель компонента
-        add(component);
+                sComponent.setFontFamilyName(fontFamilyNames[iFn]); // установка в компонент с шрифтом требуемой
+                // гарнитуры шрифта
+            }
 
-        TextAction rAction = new TextAction(component, true, "цвет", "поменять цвет"); // создание экземпляра
-                                                                               // действия для экранной кнопки
-
-        TextAction tAction = new TextAction(component, false, "гарнитура", "поменять гарнитуру");// создание экземпляра
-                                                                               // действия для экранной кнопки
-
-        JButton rBtn = new JButton(rAction); // создание экземпляра кнопки по экземпляру действия
-        JButton tBtn = new JButton(tAction);
-
-
-        rBtn.setBounds(0, h-70, 105, 30);
-        tBtn.setBounds(110, h-70, 105, 30);
-
-        add(rBtn);
-        add(tBtn);
+            sComponent.repaint(); // перерисовка компонента с изменёнными цветом или гарнитурой
+        }
     }
 
-    public ComponentFour getComponent(){
-        return component;
+    static class PanelFour extends JPanel { // панель-прокладка (?)
+        private ComponentFour component; // компонент, хранимый на экземпляре панели
+
+        public PanelFour(int w, int h) {
+            setLayout(null);
+            component = new ComponentFour();
+            component.setBounds(0, 0, w, h - 50); // добавление на панель компонента
+            add(component);
+
+            TextAction rAction = new TextAction(component, true, "цвет", "поменять цвет"); // создание экземпляра
+            // действия для экранной кнопки
+
+            TextAction tAction = new TextAction(component, false, "гарнитура", "поменять гарнитуру");// создание экземпляра
+            // действия для экранной кнопки
+
+            JButton rBtn = new JButton(rAction); // создание экземпляра кнопки по экземпляру действия
+            JButton tBtn = new JButton(tAction);
+
+
+            rBtn.setBounds(0, h - 70, 105, 30);
+            tBtn.setBounds(110, h - 70, 105, 30);
+
+            add(rBtn);
+            add(tBtn);
+        }
+
+        public ComponentFour getComponent() {
+            return component;
+        }
     }
-}
 
-class ComponentFour extends JComponent{ // компонент с текстом
-    private Color color; // хранение цвета букв для перерисовки под разные цвета
-    private String fontFamilyName; // хранение названия гарнитуры для возможности перерисовки
+    static class ComponentFour extends JComponent { // компонент с текстом
+        private Color color; // хранение цвета букв для перерисовки под разные цвета
+        private String fontFamilyName; // хранение названия гарнитуры для возможности перерисовки
 
-    public ComponentFour(){
-        setLayout(null);
-        color = Color.BLACK; // при конструировани задаются первые свойства
-        fontFamilyName = "Algerian";
-    }
+        public ComponentFour() {
+            setLayout(null);
+            color = Color.BLACK; // при конструировани задаются первые свойства
+            fontFamilyName = "Algerian";
+        }
 
-    @Override
-    protected void paintComponent(Graphics g) {
-        Graphics2D g2 = (Graphics2D) g;
-        g2.setFont(new Font(fontFamilyName, Font.PLAIN,28)); // шрифт из установленного извне свойства
-        g2.setColor(color); // цвет из установленного извне свойства
-        g2.drawString("abcdefghijklmnopqrstuvwxyz", 10, 40);
+        @Override
+        protected void paintComponent(Graphics g) {
+            Graphics2D g2 = (Graphics2D) g;
+            g2.setFont(new Font(fontFamilyName, Font.PLAIN, 28)); // шрифт из установленного извне свойства
+            g2.setColor(color); // цвет из установленного извне свойства
+            g2.drawString("abcdefghijklmnopqrstuvwxyz", 10, 40);
 
-        g2.setFont(new Font("Arial", Font.PLAIN,14)); // неизменяемое задание параметров рисования
-        g2.setColor(Color.BLACK);
-        g2.drawString(fontFamilyName, 10, 60);
-    }
+            g2.setFont(new Font("Arial", Font.PLAIN, 14)); // неизменяемое задание параметров рисования
+            g2.setColor(Color.BLACK);
+            g2.drawString(fontFamilyName, 10, 60);
+        }
 
-    public void setColor(Color c) { // сеттеры необходимые для изменения свойств отрисовки компонента
-        color = c;
-    }
+        public void setColor(Color c) { // сеттеры необходимые для изменения свойств отрисовки компонента
+            color = c;
+        }
 
-    public void setFontFamilyName(String s){
-        fontFamilyName = s;
+        public void setFontFamilyName(String s) {
+            fontFamilyName = s;
+        }
     }
 }

@@ -29,7 +29,7 @@ import java.util.prefs.Preferences;
 
 public class LevelTwo {
 
-    public static void main(String [] args){
+    public static void main(String[] args) {
         Preferences root = Preferences.userRoot();
 
         Preferences node2 = root.node("/testing/levelFour");
@@ -62,97 +62,98 @@ public class LevelTwo {
 
 
     }
-}
 
-class FrameTwo extends JFrame{
-    public FrameTwo(){
 
-        Preferences node = Preferences.userRoot().node("/testing/levelTwo");
-        Toolkit toolKit = Toolkit.getDefaultToolkit();
+    static class FrameTwo extends JFrame {
+        public FrameTwo() {
 
-        setTitle(node.get("title", "default"));
-        setSize(node.getInt("width", (int) (toolKit.getScreenSize().getWidth() / 2)),
-                              node.getInt("height", (int) (toolKit.getScreenSize().getHeight()) / 2));
+            Preferences node = Preferences.userRoot().node("/testing/levelTwo");
+            Toolkit toolKit = Toolkit.getDefaultToolkit();
 
-        setIconImage(new ImageIcon(Objects.requireNonNull(
-                this.getClass().getResource(node.get("iconFile", "/images/default.png"))) // в реалиях maven - через ресурсы
-        ).getImage());
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setResizable(node.getBoolean("resizeble", true));
+            setTitle(node.get("title", "default"));
+            setSize(node.getInt("width", (int) (toolKit.getScreenSize().getWidth() / 2)),
+                    node.getInt("height", (int) (toolKit.getScreenSize().getHeight()) / 2));
 
-        add(new ComponentTwo());
-        pack();
-    }
-}
+            setIconImage(new ImageIcon(Objects.requireNonNull(
+                    this.getClass().getResource(node.get("iconFile", "/images/default.png"))) // в реалиях maven - через ресурсы
+            ).getImage());
+            setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            setResizable(node.getBoolean("resizeble", true));
 
-class ComponentTwo extends JComponent{
-
-    private static final int PREF_HEIGHT = 350;
-    private static final int PREF_WIDTH = 500;
-
-    @Override
-    public void paintComponent(Graphics g) {
-        Graphics2D g2 = (Graphics2D) g;
-
-        System.out.println(Arrays.toString(GraphicsEnvironment.getLocalGraphicsEnvironment()
-                .getAvailableFontFamilyNames()));
-
-        float lextX = 100.0F;
-        float lextY = 80.0F;
-        float height = 190.0F;
-        float width = 300.0F;
-
-        g2.setStroke(new BasicStroke(4));
-
-        g2.setColor(Color.BLUE);
-        Rectangle2D rectangle = new Rectangle2D.Float(lextX, lextY, width, height);
-        g2.draw(rectangle);
-
-        g2.setColor(Color.RED);
-        Ellipse2D ellipse = new Ellipse2D.Double(lextX, lextY, width, height);
-        g2.draw(ellipse);
-        g2.setColor(new Color(255, 255, 255));
-        g2.fill(ellipse);
-
-        g2.setColor(Color.CYAN);
-        Line2D line = new Line2D.Double(
-                rectangle.getMinX(),
-                rectangle.getMinY(),
-                rectangle.getMaxX(),
-                rectangle.getMaxY());
-        g2.draw(line);
-
-        drawLines(g2, (int) rectangle.getMinX(), (int) rectangle.getMaxY());
-
-        System.out.println();
+            add(new ComponentTwo());
+            pack();
+        }
     }
 
-    private static void drawLines( Graphics g, int startX, int startY){
-        Graphics2D g2 = (Graphics2D) g;
+    static class ComponentTwo extends JComponent {
 
-        Font [] fonts = new Font[4];
-        Map<TextAttribute, Object> attribs = new HashMap<>();
+        private static final int PREF_HEIGHT = 350;
+        private static final int PREF_WIDTH = 500;
 
-        fonts[0] = new Font("SansSerif", Font.BOLD, 14);
+        @Override
+        public void paintComponent(Graphics g) {
+            Graphics2D g2 = (Graphics2D) g;
 
-        attribs.put(TextAttribute.FAMILY, "Dialog");
-        attribs.put(TextAttribute.SIZE, 16);
-        attribs.put(TextAttribute.WEIGHT, TextAttribute.WEIGHT_BOLD);
-        attribs.put(TextAttribute.POSTURE, TextAttribute.POSTURE_OBLIQUE);
-        attribs.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
+            System.out.println(Arrays.toString(GraphicsEnvironment.getLocalGraphicsEnvironment()
+                    .getAvailableFontFamilyNames()));
 
-        fonts[1] = new Font(attribs);
+            float lextX = 100.0F;
+            float lextY = 80.0F;
+            float height = 190.0F;
+            float width = 300.0F;
 
-        g2.setColor(new Color(3, 168, 0));
-        g2.setFont(fonts[0]);
-        g2.drawString("Фигуры", startX, startY + 25.0F);
+            g2.setStroke(new BasicStroke(4));
 
-        g2.setFont(fonts[1]);
-        g2.drawString("Фигуры", startX, startY + 50.0F);
-    }
+            g2.setColor(Color.BLUE);
+            Rectangle2D rectangle = new Rectangle2D.Float(lextX, lextY, width, height);
+            g2.draw(rectangle);
 
-    @Override
-    public Dimension getPreferredSize() {
-        return new Dimension(PREF_WIDTH, PREF_HEIGHT);
+            g2.setColor(Color.RED);
+            Ellipse2D ellipse = new Ellipse2D.Double(lextX, lextY, width, height);
+            g2.draw(ellipse);
+            g2.setColor(new Color(255, 255, 255));
+            g2.fill(ellipse);
+
+            g2.setColor(Color.CYAN);
+            Line2D line = new Line2D.Double(
+                    rectangle.getMinX(),
+                    rectangle.getMinY(),
+                    rectangle.getMaxX(),
+                    rectangle.getMaxY());
+            g2.draw(line);
+
+            drawLines(g2, (int) rectangle.getMinX(), (int) rectangle.getMaxY());
+
+            System.out.println();
+        }
+
+        private static void drawLines(Graphics g, int startX, int startY) {
+            Graphics2D g2 = (Graphics2D) g;
+
+            Font[] fonts = new Font[4];
+            Map<TextAttribute, Object> attribs = new HashMap<>();
+
+            fonts[0] = new Font("SansSerif", Font.BOLD, 14);
+
+            attribs.put(TextAttribute.FAMILY, "Dialog");
+            attribs.put(TextAttribute.SIZE, 16);
+            attribs.put(TextAttribute.WEIGHT, TextAttribute.WEIGHT_BOLD);
+            attribs.put(TextAttribute.POSTURE, TextAttribute.POSTURE_OBLIQUE);
+            attribs.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
+
+            fonts[1] = new Font(attribs);
+
+            g2.setColor(new Color(3, 168, 0));
+            g2.setFont(fonts[0]);
+            g2.drawString("Фигуры", startX, startY + 25.0F);
+
+            g2.setFont(fonts[1]);
+            g2.drawString("Фигуры", startX, startY + 50.0F);
+        }
+
+        @Override
+        public Dimension getPreferredSize() {
+            return new Dimension(PREF_WIDTH, PREF_HEIGHT);
+        }
     }
 }
