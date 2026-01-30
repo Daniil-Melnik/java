@@ -31,8 +31,20 @@ public class LevelOne {
             setTitle("LevelOne Ch 11");
             setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 
-            JMenuBar menuBar = new JMenuBar();
+            setJMenuBar(new MainMenuBar());
+        }
+    }
 
+    static class LayoutPanel extends JPanel{
+
+    }
+
+    static class BorderPanel extends JPanel{}
+
+    static class FlowPanel extends JPanel{}
+
+    static class MainMenuBar extends JMenuBar{
+        public MainMenuBar(){
             JMenu menuFile = new JMenu("Файл");
             JMenu menuLayout = new JMenu("Компоновка");
 
@@ -44,10 +56,8 @@ public class LevelOne {
             menuLayout.add(new JMenuItem(new LayoutAction(null, false)));
             menuLayout.add(new JMenuItem(new LayoutAction(null, true)));
 
-            menuBar.add(menuFile);
-            menuBar.add(menuLayout);
-
-            setJMenuBar(menuBar);
+            add(menuFile);
+            add(menuLayout);
         }
     }
 
