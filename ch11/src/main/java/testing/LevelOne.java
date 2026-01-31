@@ -12,11 +12,9 @@
 package testing;
 
 import javax.swing.*;
+import javax.swing.border.EtchedBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.geom.Rectangle2D;
-import java.util.ArrayList;
-import java.util.Iterator;
 
 public class LevelOne {
     static void main() {
@@ -48,12 +46,12 @@ public class LevelOne {
     static class ButtonPanel extends JPanel{
         public ButtonPanel(LayoutPanel p){
             setLayout(new FlowLayout());
-            setBackground(Color.MAGENTA);
+            setBorder(new EtchedBorder());
             JButton addBtn = new JButton("Добавить");
             addBtn.addActionListener((e) -> {
                 p.getFlowPanel().addRectangle();
+                p.getFlowPanel().revalidate();
                 p.getFlowPanel().repaint();
-                System.out.println("Asssa");
             });
             add(addBtn);
         }
@@ -109,22 +107,14 @@ public class LevelOne {
 
 
     static class FlowPanel extends JPanel{
-        private ArrayList<RectangleComponent> rectangles;
         public FlowPanel(){
             setLayout(new FlowLayout());
-            rectangles = new ArrayList<>();
-            rectangles.add(new RectangleComponent());
-            rectangles.add(new RectangleComponent());
-            rectangles.add(new RectangleComponent());
-            Iterator<RectangleComponent> rectIterator = rectangles.iterator();
-            while (rectIterator.hasNext()){
-                add(rectIterator.next());
-            }
-            setBackground(Color.GREEN);
         }
 
         public void addRectangle(){
-            rectangles.add(new RectangleComponent());
+            add(new RectangleComponent());
+            revalidate();
+            repaint();
             System.out.println("added");
         }
 
