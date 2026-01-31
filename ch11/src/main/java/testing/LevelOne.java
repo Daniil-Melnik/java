@@ -14,6 +14,9 @@ package testing;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 public class LevelOne {
     static void main() {
@@ -27,24 +30,123 @@ public class LevelOne {
 
         public FrameOneCh11(){
             setLayout(new BorderLayout());
-            setSize(500, 300);
+            setSize(700, 450);
             setTitle("LevelOne Ch 11");
             setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+            setResizable(false);
 
-            setJMenuBar(new MainMenuBar());
+            LayoutPanel layoutPanel = new LayoutPanel();
+            ButtonPanel buttonPanel = new ButtonPanel(layoutPanel);
+            setJMenuBar(new MainMenuBar(layoutPanel));
+
+            add(buttonPanel, BorderLayout.SOUTH);
+            add(layoutPanel, BorderLayout.NORTH);
+
+        }
+    }
+
+    static class ButtonPanel extends JPanel{
+        public ButtonPanel(LayoutPanel p){
+            setLayout(new FlowLayout());
+            setBackground(Color.MAGENTA);
+            JButton addBtn = new JButton("Добавить");
+            addBtn.addActionListener((e) -> {
+                p.getFlowPanel().addRectangle();
+                p.getFlowPanel().repaint();
+                System.out.println("Asssa");
+            });
+            add(addBtn);
+        }
+
+        @Override
+        public Dimension getPreferredSize() {
+            return new Dimension(700, 90);
         }
     }
 
     static class LayoutPanel extends JPanel{
+        BorderPanel borderPanel = new BorderPanel();
+        FlowPanel flowPanel = new FlowPanel();
 
+        public LayoutPanel(){
+            setLayout(new BorderLayout());
+            setBackground(Color.BLACK);
+            add(flowPanel, BorderLayout.NORTH);
+            add(borderPanel, BorderLayout.SOUTH);
+        }
+
+        @Override
+        public Dimension getPreferredSize() {
+            return new Dimension(500, 300);
+        }
+
+        public void setPanel(boolean type){
+            flowPanel.setVisible(!type);
+            borderPanel.setVisible(type);
+            System.out.println(type + " " + !type);
+        }
+
+        public BorderPanel getBorderPanel(){
+            return borderPanel;
+        }
+
+        public FlowPanel getFlowPanel(){
+            return flowPanel;
+        }
     }
 
-    static class BorderPanel extends JPanel{}
+    static class BorderPanel extends JPanel{
+        public BorderPanel(){
+            setLayout(new BorderLayout());
+            setBackground(Color.RED);
+        }
 
-    static class FlowPanel extends JPanel{}
+        @Override
+        public Dimension getPreferredSize() {
+            return new Dimension(500, 300);
+        }
+    }
+
+
+    static class FlowPanel extends JPanel{
+        private ArrayList<RectangleComponent> rectangles;
+        public FlowPanel(){
+            setLayout(new FlowLayout());
+            rectangles = new ArrayList<>();
+            rectangles.add(new RectangleComponent());
+            rectangles.add(new RectangleComponent());
+            rectangles.add(new RectangleComponent());
+            Iterator<RectangleComponent> rectIterator = rectangles.iterator();
+            while (rectIterator.hasNext()){
+                add(rectIterator.next());
+            }
+            setBackground(Color.GREEN);
+        }
+
+        public void addRectangle(){
+            rectangles.add(new RectangleComponent());
+            System.out.println("added");
+        }
+
+        @Override
+        public Dimension getPreferredSize() {
+            return new Dimension(500, 300);
+        }
+    }
+
+    static class RectangleComponent extends JPanel{
+        public RectangleComponent(){
+            setBackground(Color.BLUE);
+        }
+
+        @Override
+        public Dimension getPreferredSize() {
+            return new Dimension(50, 50);
+        }
+    }
 
     static class MainMenuBar extends JMenuBar{
-        public MainMenuBar(){
+        public MainMenuBar(LayoutPanel panel){
             JMenu menuFile = new JMenu("Файл");
             JMenu menuLayout = new JMenu("Компоновка");
 
@@ -53,8 +155,8 @@ public class LevelOne {
             menuFile.addSeparator();
             menuFile.add(new AboutAction());
 
-            menuLayout.add(new JMenuItem(new LayoutAction(null, false)));
-            menuLayout.add(new JMenuItem(new LayoutAction(null, true)));
+            menuLayout.add(new JMenuItem(new LayoutAction(panel, false)));
+            menuLayout.add(new JMenuItem(new LayoutAction(panel, true)));
 
             add(menuFile);
             add(menuLayout);
@@ -62,11 +164,11 @@ public class LevelOne {
     }
 
     static class LayoutAction extends AbstractAction{
-        JComponent component; // панель с двумя компонентами разной видимости
+        LayoutPanel panel; // панель с двумя компонентами разной видимости
         boolean layoutType;
 
-        public LayoutAction(JComponent c, boolean t){
-            component = c;
+        public LayoutAction(LayoutPanel c, boolean t){
+            panel = c;
             layoutType = t;
             putValue(Action.NAME, layoutType ? "Граничная" : "Поточная");
         }
@@ -78,8 +180,8 @@ public class LevelOne {
         @Override
         public void actionPerformed(ActionEvent e) {
             try {
-                component.setLayout(layoutType ? new BorderLayout() : new FlowLayout());
-                component.revalidate();
+                panel.setPanel(layoutType);
+                // panel.revalidate();
             } catch (NullPointerException ex) {
                 System.out.println(ex.getMessage());
             }
