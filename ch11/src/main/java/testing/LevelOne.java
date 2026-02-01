@@ -15,8 +15,15 @@ import javax.swing.*;
 import javax.swing.border.EtchedBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class LevelOne {
+
+    private static LayoutPanel layoutPanel; // статические переменные для хранения панелей
+    private static FlowPanel flowPanel;
+    private static BorderPanel borderPanel;
+    private static ButtonPanel buttonPanel;
+
     static void main() {
         EventQueue.invokeLater(() -> {
             FrameOneCh11 frame = new FrameOneCh11();
@@ -33,9 +40,10 @@ public class LevelOne {
             setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
             setResizable(false);
 
-            LayoutPanel layoutPanel = new LayoutPanel();
-            ButtonPanel buttonPanel = new ButtonPanel(layoutPanel);
-            setJMenuBar(new MainMenuBar(layoutPanel));
+            layoutPanel = new LayoutPanel();
+            buttonPanel = new ButtonPanel();
+            buttonPanel.setAccessForButtons(true);
+            setJMenuBar(new MainMenuBar()); // установка панели с меню
 
             add(buttonPanel, BorderLayout.SOUTH);
             add(layoutPanel, BorderLayout.NORTH);
@@ -43,17 +51,59 @@ public class LevelOne {
         }
     }
 
+    // панель с кнопкаму иправления: добавление и направление граничной компоновки
     static class ButtonPanel extends JPanel{
-        public ButtonPanel(LayoutPanel p){
-            setLayout(new FlowLayout());
-            setBorder(new EtchedBorder());
-            JButton addBtn = new JButton("Добавить");
-            addBtn.addActionListener((e) -> {
-                p.getFlowPanel().addRectangle();
-                p.getFlowPanel().revalidate();
-                p.getFlowPanel().repaint();
+        private final JRadioButton southRadio; // радио-кнопки
+        private final JRadioButton northRadio;
+        private final JRadioButton westRadio;
+        private final JRadioButton eastRadio;
+
+        JButton addBtn; // кнопка добавления квадрата
+
+        public ButtonPanel(){
+            setLayout(new FlowLayout()); // установка поточного менеджера компоновки
+            setBorder(new EtchedBorder()); // установка границы блока кнопок
+            addBtn = new JButton("Добавить"); // кнопка добавления квадрата
+            addBtn.addActionListener((e) -> { // действие к кнопке обавления
+                flowPanel.addRectangle(); // метод из поточной панели
             });
             add(addBtn);
+
+            ButtonGroup buttonGroup = new ButtonGroup(); // группа для радио-кнопок
+
+            southRadio = new JRadioButton("SOUTH"); // формирование кнопок с подписями
+            northRadio = new JRadioButton("NORTH");
+            westRadio = new JRadioButton("WEST");
+            eastRadio = new JRadioButton("EAST");
+
+            buttonGroup.add(southRadio); // добавление радио-кнопок в группу
+            buttonGroup.add(northRadio);
+            buttonGroup.add(westRadio);
+            buttonGroup.add(eastRadio);
+
+            southRadio.addActionListener(new BorderActionListener(BorderLayout.SOUTH)); // присвоение перехватчиков радио-кнопкам
+            northRadio.addActionListener(new BorderActionListener(BorderLayout.NORTH));
+            westRadio.addActionListener(new BorderActionListener(BorderLayout.WEST));
+            eastRadio.addActionListener(new BorderActionListener(BorderLayout.EAST));
+
+            JPanel radioPanel = new JPanel(); // панель под радио-кнопки
+            radioPanel.setSize(350, 90);
+
+            radioPanel.add(southRadio); // добавление в пнель радио-кнопок
+            radioPanel.add(northRadio);
+            radioPanel.add(westRadio);
+            radioPanel.add(eastRadio);
+
+            add(radioPanel); // добавление панели с радио-кнопками на панель с кнопками
+        }
+
+        public void setAccessForButtons(boolean accessType){ // установка доступности для кнопок: радио/добавление
+            southRadio.setEnabled(accessType);
+            northRadio.setEnabled(accessType);
+            westRadio.setEnabled(accessType);
+            eastRadio.setEnabled(accessType);
+
+            addBtn.setEnabled(!accessType);
         }
 
         @Override
@@ -62,14 +112,13 @@ public class LevelOne {
         }
     }
 
-    static class LayoutPanel extends JPanel{
-        BorderPanel borderPanel = new BorderPanel();
-        FlowPanel flowPanel = new FlowPanel();
-
+    static class LayoutPanel extends JPanel{ // панель с панелями граничной и поточной (попеременный выбор)
         public LayoutPanel(){
+            borderPanel = new BorderPanel(); // грничная панель
+            flowPanel = new FlowPanel(); // поточная панель
+
             setLayout(new BorderLayout());
-            setBackground(Color.BLACK);
-            add(flowPanel, BorderLayout.NORTH);
+            add(flowPanel, BorderLayout.NORTH); // помещение  номинально разные точки для того, чтобы отрисовывались обе
             add(borderPanel, BorderLayout.SOUTH);
         }
 
@@ -78,44 +127,53 @@ public class LevelOne {
             return new Dimension(500, 300);
         }
 
-        public void setPanel(boolean type){
+        public void setPanel(boolean type){ // метод для переключения панелей
             flowPanel.setVisible(!type);
             borderPanel.setVisible(type);
-            System.out.println(type + " " + !type);
-        }
-
-        public BorderPanel getBorderPanel(){
-            return borderPanel;
-        }
-
-        public FlowPanel getFlowPanel(){
-            return flowPanel;
         }
     }
 
-    static class BorderPanel extends JPanel{
+    static class BorderActionListener implements ActionListener{ // перехватчик для изменения границы в граничной панели
+        private final String layout;
+
+        public BorderActionListener(String l){
+            layout = l;
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            borderPanel.setBorder(layout);
+        }
+    }
+
+    static class BorderPanel extends JPanel{ // граничная панель
+        RectangleComponent rectangle = new RectangleComponent();
         public BorderPanel(){
-            setLayout(new BorderLayout());
-            setBackground(Color.RED);
+            setLayout(new BorderLayout()); // установка граничного компоновщика
+            add(rectangle); // добавление первичного прямоугольника
         }
 
         @Override
         public Dimension getPreferredSize() {
             return new Dimension(500, 300);
         }
+
+        public void setBorder(String newLayout){ // обновление положения фигуры при изменении границы
+            remove(rectangle);
+            add(rectangle, newLayout);
+            revalidate();
+        }
     }
 
 
-    static class FlowPanel extends JPanel{
+    static class FlowPanel extends JPanel{ // поточная панель
         public FlowPanel(){
-            setLayout(new FlowLayout());
+            setLayout(new FlowLayout()); // установка поточного компоновщика
         }
 
         public void addRectangle(){
-            add(new RectangleComponent());
-            revalidate();
-            repaint();
-            System.out.println("added");
+            add(new RectangleComponent()); // добавления прямоугольника
+            revalidate(); // перерасчет координат
         }
 
         @Override
@@ -124,7 +182,7 @@ public class LevelOne {
         }
     }
 
-    static class RectangleComponent extends JPanel{
+    static class RectangleComponent extends JPanel{ // цветной прямоугольник
         public RectangleComponent(){
             setBackground(Color.BLUE);
         }
@@ -135,43 +193,41 @@ public class LevelOne {
         }
     }
 
-    static class MainMenuBar extends JMenuBar{
-        public MainMenuBar(LayoutPanel panel){
-            JMenu menuFile = new JMenu("Файл");
-            JMenu menuLayout = new JMenu("Компоновка");
+    static class MainMenuBar extends JMenuBar{ // класс-контейнер меню
+        public MainMenuBar(){
+            JMenu menuFile = new JMenu("Файл"); // меню "Файл"
+            JMenu menuLayout = new JMenu("Компоновка"); // меню "Компоновка" - переключение панелей компоновки
 
-            JMenuItem exitItem = new JMenuItem(new ExitAction());
+            JMenuItem exitItem = new JMenuItem(new ExitAction()); // конструирование пункта по действию
             menuFile.add(exitItem);
-            menuFile.addSeparator();
-            menuFile.add(new AboutAction());
+            menuFile.addSeparator(); // добавление разделителей
+            menuFile.add(new AboutAction()); // добавление пункта в виде сразу действия
 
-            menuLayout.add(new JMenuItem(new LayoutAction(panel, false)));
-            menuLayout.add(new JMenuItem(new LayoutAction(panel, true)));
+            menuLayout.add(new JMenuItem(new LayoutAction(false))); // Поточная компоновка
+            menuLayout.add(new JMenuItem(new LayoutAction(true))); // Граничная компоновка
 
-            add(menuFile);
+            add(menuFile); // добавление меню в панель меню
             add(menuLayout);
         }
     }
 
-    static class LayoutAction extends AbstractAction{
-        LayoutPanel panel; // панель с двумя компонентами разной видимости
+    static class LayoutAction extends AbstractAction{ // действие для формирования пунктов компоновки
         boolean layoutType;
 
-        public LayoutAction(LayoutPanel c, boolean t){
-            panel = c;
+        public LayoutAction( boolean t){
             layoutType = t;
             putValue(Action.NAME, layoutType ? "Граничная" : "Поточная");
         }
 
         public LayoutAction(){
-            this(null, false);
+            this(false);
         }
 
         @Override
         public void actionPerformed(ActionEvent e) {
             try {
-                panel.setPanel(layoutType);
-                // panel.revalidate();
+                layoutPanel.setPanel(layoutType); // переключение панелей
+                buttonPanel.setAccessForButtons(layoutType); // установка доступности кнопок управления
             } catch (NullPointerException ex) {
                 System.out.println(ex.getMessage());
             }
@@ -179,7 +235,7 @@ public class LevelOne {
         }
     }
 
-    static class ExitAction extends AbstractAction{
+    static class ExitAction extends AbstractAction{ // действие по выходу из приложения
 
         public ExitAction(){
             putValue(Action.NAME, "Выход");
@@ -191,7 +247,7 @@ public class LevelOne {
 
             JFrame frame = (JFrame) SwingUtilities.getWindowAncestor((Component) e.getSource());
 
-            if (JOptionPane.showConfirmDialog
+            if (JOptionPane.showConfirmDialog // диалоговое окно с запросом
                     (frame, "Выйти?", "Выход", JOptionPane.YES_NO_OPTION)
                     == JOptionPane.YES_OPTION){
                 System.exit(0);
@@ -199,7 +255,7 @@ public class LevelOne {
         }
     }
 
-    static class AboutAction extends AbstractAction{
+    static class AboutAction extends AbstractAction{ // действие по информации о программе
         public AboutAction(){
             putValue(Action.NAME, "О программе");
             putValue(Action.SHORT_DESCRIPTION, "Информация о программе");
@@ -207,14 +263,10 @@ public class LevelOne {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            JOptionPane.showMessageDialog(
+            JOptionPane.showMessageDialog( // информационное окно
                     (JFrame) SwingUtilities.getWindowAncestor ((Component) e.getSource()),
                     "Программа тестирования поточной и граничной компоновки"
             );
         }
     }
 }
-
-
-
-
