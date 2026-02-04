@@ -15,7 +15,10 @@ package testing;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 
 public class LevelTwo {
     private static MainFrame mainFrame;
@@ -33,11 +36,13 @@ public class LevelTwo {
     private static final int CALC_PANEL_H = 70;
 
     private static final String[] BTN_S = {"1", "2" , "3", "+", "4", "5", "6", "-",
-                                           "7", "8", "9", "/" , "0", "%", "=", "*"};
+                                           "7", "8", "9", "/" , "0", "C", "=", "*"};
 
-    private static final String[] BTN_SG = {"=", "/" , "%", "*", "+"};
+    private static final String[] BTN_SG = {"=", "/" , "*", "+"};
 
-    private static final String[] BTN_SG_W_MINUS = {"=", "/" , "%", "*", "-", "+"};
+    private static final String[] BTN_SG_W_MINUS = {"=", "/" , "*", "-", "+"};
+
+    private static final int SYMBOLS_PER_STR = 13;
 
     public static void main(String[] args){
         EventQueue.invokeLater(() -> {
@@ -62,13 +67,25 @@ public class LevelTwo {
     }
 
     private static class BtnPanel extends JPanel{
+        private static JButton[] btns = new JButton[16];
+
         public BtnPanel(){
             setLayout(new GridLayout(4, 4));
+            int i = 0;
             for (String s : BTN_S){
-                JButton btn = new JButton(new BtnAction(s));
-                btn.setFont(new Font("Courier New", Font.BOLD, 16));
-                add(btn);
+                btns[i] = new JButton(new BtnAction(s));
+                btns[i].setFont(new Font("Courier New", Font.BOLD, 16));
+                add(btns[i]);
+                i++;
             }
+        }
+
+        public void setEnableBtns(boolean b){
+            for (int i = 0; i < 16; i++){
+                btns[i].getAction().setEnabled(b);
+            }
+            btns[13].getAction().setEnabled(true);
+            btns[14].getAction().setEnabled(true);
         }
 
         @Override
@@ -98,41 +115,164 @@ public class LevelTwo {
         }
         @Override
         public void actionPerformed(ActionEvent e) {
-            screenComponent.setStr(this.getValue(Action.NAME).toString());
+            try{
+                screenComponent.setStr(this.getValue(Action.NAME).toString());
+            }catch (MaxExpLengthExeption ex){
+                JOptionPane.showMessageDialog(mainFrame, ex.getMessage());
+                btnPanel.setEnableBtns(false);
+                screenComponent.setK(2);
+            }
+
+        }
+
+        public ArrayList<String> splitMathExpr(String s){
+
+            String [] arrMult = s.split("(?<=[-*/+])");
+            System.out.println(Arrays.toString(arrMult));
+            return null;
         }
     }
 
     private static class ScreenComponent extends JComponent{
         private String str = "";
         private boolean lastInSGwM;
+        private int k = 1;
 
         @Override
         protected void paintComponent(Graphics g) {
-            g.setFont(new Font("Courier New", Font.BOLD, 16));
+            g.setFont(new Font("Courier New", Font.BOLD, 32 / k));
             g.drawString(str, 0, 20);
         }
 
-        public void setStr(String s) {
+        public void setStr(String s) throws MaxExpLengthExeption {
             validInsert(s);
         }
 
-        private void validInsert(String s){
-            if ((str.isEmpty()) && (!Arrays.asList(BTN_SG).contains(s))){
-                str = str + s;
+        public void setK(int nk){
+            k = nk;
+        }
+
+        private void validInsert(String s) throws MaxExpLengthExeption{
+
+            k = str.length() / SYMBOLS_PER_STR + 1;
+
+            if ((s.equals("C")) && (!str.isEmpty())) {
+                if (k == 3) k = 2;
+                str = str.substring(0, str.length()-1);
+                btnPanel.setEnableBtns(true);
+                repaint();
+            }
+
+            else if (k == 3) {
+                throw new MaxExpLengthExeption();
+            }
+
+            else if (s.equals("=")){
+                str += "=" + calculateExpr(getSplitExpression());
+                btnPanel.setEnableBtns(true);
+                repaint();
+            } else if ((!s.equals("C")) && (str.isEmpty()) && (!Arrays.asList(BTN_SG).contains(s))){
+                str += s;
                 lastInSGwM = Arrays.asList(BTN_SG_W_MINUS).contains(s);
                 repaint();
             }
-            else if (((!str.isEmpty())) && !(lastInSGwM && Arrays.asList(BTN_SG_W_MINUS).contains(s))){
-                System.out.println(lastInSGwM + " " + Arrays.asList(BTN_SG_W_MINUS).contains(s));
-                str = str + s;
+            else if ((!s.equals("C")) &&((!str.isEmpty())) && !(lastInSGwM && Arrays.asList(BTN_SG_W_MINUS).contains(s))){
+                str += s;
                 lastInSGwM = Arrays.asList(BTN_SG_W_MINUS).contains(s);
                 repaint();
             }
+        }
+
+        private ArrayList<String> getSplitExpression(){
+
+            String [] splittedStr = str.split("(?<=[-*/+])");
+            System.out.println(Arrays.toString(splittedStr));
+            return new ArrayList<>(List.of(splittedStr));
+        }
+
+        private String calculateExpr(ArrayList<String> sA){
+            Iterator<String> iter = sA.iterator();
+
+            String current = "";
+            String next = "";
+            String nextOp = "";
+
+            int currentI = 0;
+            int nextI = 0;
+            int res = 0;
+
+            String regex = ".*[-+*/]";
+            int l = sA.size();
+            int i = 0;
+            while (i < l){
+                current = sA.get(i);
+                char lastChar = current.charAt(current.length()-1);
+                if (lastChar == '*' || lastChar == '/'){
+                    next = sA.get(i+1);
+                    currentI = Integer.parseInt(current.substring(0, current.length()-1));
+                    nextI = Integer.parseInt(next.matches(regex) ? next.substring(0, next.length()-1) : next);
+                    nextOp = (next.matches(regex) ? next.charAt(next.length()-1) + "" : "");
+                    sA.remove(i+1);
+                }
+                switch (lastChar){
+                    case '*':
+                        res = currentI * nextI;
+                        sA.set(i, res + nextOp);
+                        l--;
+                        i=0;
+                        break;
+                    case '/':
+                        res = currentI / nextI;
+                        sA.set(i, res + nextOp);
+                        l--;
+                        i=0;
+                    default:
+                        i++;
+                }
+                System.out.println(sA);
+            }
+
+            i = 0;
+            while (i < l){
+                current = sA.get(i);
+                char lastChar = current.charAt(current.length()-1);
+                if (lastChar == '-' || lastChar == '+'){
+                    next = sA.get(i+1);
+                    currentI = Integer.parseInt(current.substring(0, current.length()-1));
+                    nextI = Integer.parseInt(next.matches(regex) ? next.substring(0, next.length()-1) : next);
+                    nextOp = (next.matches(regex) ? next.charAt(next.length()-1) + "" : "");
+                    sA.remove(i+1);
+                }
+                switch (current.charAt(current.length()-1)){
+                    case '-':
+                        res = currentI - nextI;
+                        sA.set(i, res + nextOp);
+                        l--;
+                        i=0;
+                        break;
+                    case '+':
+                        res = currentI + nextI;
+                        sA.set(i, res + nextOp);
+                        l--;
+                        i=0;
+                    default:
+                        i++;
+                }
+                System.out.println(sA);
+            }
+            return sA.get(0);
         }
 
         @Override
         public Dimension getPreferredSize() {
             return new Dimension(CALC_PANEL_H, CALC_PANEL_W);
+        }
+    }
+
+    private static class MaxExpLengthExeption extends RuntimeException{
+        @Override
+        public String getMessage() {
+            return "Превышена максимальная длина выражения";
         }
     }
 }
