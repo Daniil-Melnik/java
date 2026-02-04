@@ -8,7 +8,7 @@
 - при недопустимых операциях - вывод окна с ошибкой
 */
 
-// настроить разбор выражения на составные части и вычисление его результата
+// очистка результата после нажатия равенства
 
 package testing;
 
@@ -38,7 +38,12 @@ public class LevelTwo {
     private static final String[] BTN_S = {"1", "2" , "3", "+", "4", "5", "6", "-",
                                            "7", "8", "9", "/" , "0", "C", "=", "*"};
 
-    private static final String[] BTN_SG = {"=", "/" , "*", "+"};
+    private static final String[] KEYSTROKES = {"NUMPAD1", "NUMPAD2", "NUMPAD3", "ADD", "NUMPAD4", "NUMPAD5",
+                                                "NUMPAD6", "SUBTRACT", "NUMPAD7", "NUMPAD8", "NUMPAD9",
+                                                "DIVIDE", "NUMPAD0", "BACK_SPACE", "ENTER", "MULTIPLY"
+                                               };
+
+    private static final String[] BTN_SG = {"=", "/" , "-", "*", "+"};
 
     private static final String[] BTN_SG_W_MINUS = {"=", "/" , "*", "-", "+"};
 
@@ -68,24 +73,43 @@ public class LevelTwo {
 
     private static class BtnPanel extends JPanel{
         private static JButton[] btns = new JButton[16];
+        private static BtnAction[] actions = new BtnAction[16];
 
         public BtnPanel(){
             setLayout(new GridLayout(4, 4));
             int i = 0;
-            for (String s : BTN_S){
-                btns[i] = new JButton(new BtnAction(s));
+
+            for (String s : BTN_S) {
+                actions[i] = new BtnAction(s);
+                btns[i] = new JButton(actions[i]);
                 btns[i].setFont(new Font("Courier New", Font.BOLD, 16));
                 add(btns[i]);
                 i++;
             }
+
+            createKeyIAMap();
         }
 
         public void setEnableBtns(boolean b){
             for (int i = 0; i < 16; i++){
-                btns[i].getAction().setEnabled(b);
+                btns[i].setEnabled(b);
+                actions[i].putValue("enabled", b);
             }
-            btns[13].getAction().setEnabled(true);
-            btns[14].getAction().setEnabled(true);
+            btns[13].setEnabled(true);
+            btns[14].setEnabled(true);
+
+            actions[13].putValue("enabled", true);
+            actions[14].putValue("enabled", true);
+        }
+
+        private void createKeyIAMap(){
+            ActionMap amap = this.getActionMap();
+            InputMap imap = this.getInputMap(WHEN_IN_FOCUSED_WINDOW);
+
+            for (int i = 0; i < 16; i++){
+                imap.put(KeyStroke.getKeyStroke(KEYSTROKES[i]), BTN_S[i]);
+                amap.put(BTN_S[i], actions[i]);
+            }
         }
 
         @Override
@@ -112,11 +136,13 @@ public class LevelTwo {
         public BtnAction(String s){
             putValue(Action.NAME, s);
             putValue(Action.SHORT_DESCRIPTION, s);
+            putValue("enabled", true);
         }
         @Override
         public void actionPerformed(ActionEvent e) {
             try{
-                screenComponent.setStr(this.getValue(Action.NAME).toString());
+                if ((boolean) this.getValue("enabled"))
+                    screenComponent.setStr(this.getValue(Action.NAME).toString());
             }catch (MaxExpLengthExeption ex){
                 JOptionPane.showMessageDialog(mainFrame, ex.getMessage());
                 btnPanel.setEnableBtns(false);
@@ -135,6 +161,7 @@ public class LevelTwo {
 
     private static class ScreenComponent extends JComponent{
         private String str = "";
+        private String strRes = "";
         private boolean lastInSGwM;
         private int k = 1;
 
@@ -142,6 +169,8 @@ public class LevelTwo {
         protected void paintComponent(Graphics g) {
             g.setFont(new Font("Courier New", Font.BOLD, 32 / k));
             g.drawString(str, 0, 20);
+            g.setFont(new Font("Courier New", Font.BOLD, 26));
+            g.drawString(strRes, 5, 60);
         }
 
         public void setStr(String s) throws MaxExpLengthExeption {
@@ -168,9 +197,14 @@ public class LevelTwo {
             }
 
             else if (s.equals("=")){
-                str += "=" + calculateExpr(getSplitExpression());
-                btnPanel.setEnableBtns(true);
-                repaint();
+                try {
+                    strRes = "=" + calculateExpr(getSplitExpression());
+                    btnPanel.setEnableBtns(true);
+                    repaint();
+                } catch (IndexOutOfBoundsException e){
+                    JOptionPane.showMessageDialog(mainFrame, "Некорректное выражение", "Допишите", JOptionPane.ERROR_MESSAGE);
+                }
+
             } else if ((!s.equals("C")) && (str.isEmpty()) && (!Arrays.asList(BTN_SG).contains(s))){
                 str += s;
                 lastInSGwM = Arrays.asList(BTN_SG_W_MINUS).contains(s);
@@ -184,7 +218,6 @@ public class LevelTwo {
         }
 
         private ArrayList<String> getSplitExpression(){
-
             String [] splittedStr = str.split("(?<=[-*/+])");
             System.out.println(Arrays.toString(splittedStr));
             return new ArrayList<>(List.of(splittedStr));
