@@ -66,7 +66,7 @@ public class LevelTwo {
 
             calcPanel = new CalcPanel(); // введение панели-экрана
             add(calcPanel, BorderLayout.NORTH); // вверху
-            setJMenuBar(new MainMenuBar());
+            setJMenuBar(new MainMenuBar()); // установка строки меню
         }
     }
 
@@ -250,11 +250,12 @@ public class LevelTwo {
 
         // разбивка выражения по знакам арифметических операций
         private ArrayList<String> getSplitExpression(){
-            String [] splittedStr = str.split("(?<=[-*/+])");
-            System.out.println(Arrays.toString(splittedStr));
-            return new ArrayList<>(List.of(splittedStr));
+            String [] splittedStr = str.split("(?<=[-*/+])"); // разбивка по регулярному выражению 25+,7-,5 ~ 25+7-5
+            return new ArrayList<>(List.of(splittedStr)); // формироание выходного списочного массива
         }
 
+        // логика подсчёта значения выражения с учетом приоритетов операции в отсутсвие скобок
+        // на базе сокращения массива значений-операций до одного элемента - результата
         private int calculateExpr(ArrayList<String> sA){
             String current = "";
             String next = "";
@@ -270,7 +271,7 @@ public class LevelTwo {
             while (i < l){
                 current = sA.get(i);
                 char lastChar = current.charAt(current.length()-1);
-                if (lastChar == '*' || lastChar == '/'){
+                if (lastChar == '*' || lastChar == '/'){ // выполнение приоритетных * и /
                     next = sA.get(i+1);
                     currentI = Integer.parseInt(current.substring(0, current.length()-1));
                     nextI = Integer.parseInt(next.matches(regex) ? next.substring(0, next.length()-1) : next);
@@ -300,7 +301,7 @@ public class LevelTwo {
             while (i < l){
                 current = sA.get(i);
                 char lastChar = current.charAt(current.length()-1);
-                if (lastChar == '-' || lastChar == '+'){
+                if (lastChar == '-' || lastChar == '+'){ // выполнение оставшихся - и +
                     next = sA.get(i+1);
                     currentI = Integer.parseInt(current.substring(0, current.length()-1));
                     nextI = Integer.parseInt(next.matches(regex) ? next.substring(0, next.length()-1) : next);
@@ -334,31 +335,31 @@ public class LevelTwo {
         }
     }
 
-    private static class MaxExpLengthExeption extends RuntimeException{
+    private static class MaxExpLengthExeption extends RuntimeException{ // ошибка максимальной длины выражения на экране
         @Override
         public String getMessage() {
             return "Превышена максимальная длина выражения";
         }
     }
 
-    private static class MainMenuBar extends JMenuBar{
+    private static class MainMenuBar extends JMenuBar{ // полоса меню
 
         private final int[] items = {2, 8, 10, 16};
 
         public MainMenuBar(){
             JMenuItem item = null;
             JRadioButtonMenuItem radioItem = null;
-            ButtonGroup group = new ButtonGroup();
+            ButtonGroup group = new ButtonGroup(); // группа пунктов меню - радио-кнопок
 
             JMenu exitMenu = new JMenu("Файл");
-            JMenu numSysMenu = new JMenu("СисСчис");
+            JMenu numSysMenu = new JMenu("СисСчис"); // меню для радио-кнопок
 
             JMenuItem exitItem = new JMenuItem("Закрыть");
             JMenuItem aboutItem = new JMenuItem("О программе");
 
             for (int i : items){
 
-                radioItem = new JRadioButtonMenuItem(Integer.toString(i));
+                radioItem = new JRadioButtonMenuItem(Integer.toString(i)); // наполнение меню и группы пунктами-радиокнопками
                 group.add(radioItem);
                 if (i == 10) radioItem.setSelected(true);
 
