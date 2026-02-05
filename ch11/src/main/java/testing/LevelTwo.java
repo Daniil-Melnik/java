@@ -104,7 +104,7 @@ public class LevelTwo {
             actions[14].putValue("enabled", true);
         }
 
-        private void createKeyIAMap(){ // метод формирования отображений действие-ключ-клавиша
+        private void createKeyIAMap(){ // метод формирования отображения действие-ключ-клавиша
             ActionMap amap = this.getActionMap();
             InputMap imap = this.getInputMap(WHEN_IN_FOCUSED_WINDOW);
 
@@ -120,11 +120,11 @@ public class LevelTwo {
         }
     }
 
-    private static class CalcPanel extends JPanel{
+    private static class CalcPanel extends JPanel{ // панель-экран вычислений
         public CalcPanel(){
-            setLayout(new BorderLayout());
-            setBackground(Color.WHITE);
-            screenComponent = new ScreenComponent();
+            setLayout(new BorderLayout()); // граничная компоновка
+            setBackground(Color.WHITE); // фон - белый
+            screenComponent = new ScreenComponent(); // добаление компонента отрисовки выражения и результата
             add(screenComponent);
         }
 
@@ -134,46 +134,39 @@ public class LevelTwo {
         }
     }
 
-    private static class BtnAction extends AbstractAction{
+    private static class BtnAction extends AbstractAction{ // действие для кнопки
         public BtnAction(String s){
             putValue(Action.NAME, s);
             putValue(Action.SHORT_DESCRIPTION, s);
-            putValue("enabled", true);
+            putValue("enabled", true); // отдельный ключ для "блокированности"
         }
         @Override
         public void actionPerformed(ActionEvent e) {
             try{
-                if ((boolean) this.getValue("enabled"))
-                    screenComponent.setStr(this.getValue(Action.NAME).toString());
+                if ((boolean) this.getValue("enabled")) // разблокировано => можно выполнять
+                    screenComponent.setStr(this.getValue(Action.NAME).toString()); // обновить строку на экране
             }catch (MaxExpLengthExeption ex){
-                JOptionPane.showMessageDialog(mainFrame, ex.getMessage());
-                btnPanel.setEnableBtns(false);
+                JOptionPane.showMessageDialog(mainFrame, ex.getMessage()); // строка слишком длинная => выдача сообщения
+                btnPanel.setEnableBtns(false); // и блокировка всего кроме равенства и удаления
                 screenComponent.setK(2);
             }
 
         }
-
-        public ArrayList<String> splitMathExpr(String s){
-
-            String [] arrMult = s.split("(?<=[-*/+])");
-            System.out.println(Arrays.toString(arrMult));
-            return null;
-        }
     }
 
-    private static class ScreenComponent extends JComponent{
-        private String str = "";
-        private String strRes = "";
-        private boolean lastInSGwM;
-        private int k = 1;
-        private boolean eqOp = false;
-        private int radix = 10;
+    private static class ScreenComponent extends JComponent{ // компонент отрисовки цифр и зопераций
+        private String str = ""; // строка выражения
+        private String strRes = ""; // строка результата
+        private boolean lastInSGwM; // флаг ввода знака операции
+        private int k = 1; // делитель кегля для кол-ва символов
+        private boolean eqOp = false; // флаг нажатия операции равенства
+        private int radix = 10; // основание выводимой системы счисления
 
         @Override
-        protected void paintComponent(Graphics g) {
-            g.setFont(new Font("Courier New", Font.BOLD, 32 / k));
+        protected void paintComponent(Graphics g) { // отрисовка компонента
+            g.setFont(new Font("Courier New", Font.BOLD, 32 / k)); // отрисовка выражения
             g.drawString(str, 0, 25);
-            g.setFont(new Font("Courier New", Font.BOLD, 26));
+            g.setFont(new Font("Courier New", Font.BOLD, 26)); // отрисовка результата
             g.drawString(strRes, 5, 65);
         }
 
@@ -185,6 +178,8 @@ public class LevelTwo {
             k = nk;
         }
 
+        // примитивная логика формирования строки выражения
+        // и строки результата
         private void validInsert(String s) throws MaxExpLengthExeption{
 
             k = str.length() / SYMBOLS_PER_STR + 1;
@@ -251,6 +246,7 @@ public class LevelTwo {
             radix = r;
         }
 
+        // разбивка выражения по знакам арифметических операций
         private ArrayList<String> getSplitExpression(){
             String [] splittedStr = str.split("(?<=[-*/+])");
             System.out.println(Arrays.toString(splittedStr));
