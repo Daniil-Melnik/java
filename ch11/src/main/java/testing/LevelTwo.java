@@ -8,9 +8,6 @@
 - при недопустимых операциях - вывод окна с ошибкой
 */
 
-// очистка результата после нажатия равенства
-// введение перевода в системы счисления результата
-
 package testing;
 
 import javax.swing.*;
@@ -18,37 +15,35 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
 public class LevelTwo {
-    private static MainFrame mainFrame;
-    private static BtnPanel btnPanel;
-    private static CalcPanel calcPanel;
-    private static ScreenComponent screenComponent;
+    private static MainFrame mainFrame; // главное окно
+    private static BtnPanel btnPanel;   // панель с кнопками (сеточная компоновка)
+    private static CalcPanel calcPanel; // панель с компонентом отрисовки выражения и результата
+    private static ScreenComponent screenComponent; // компонент отрисовки выражения и результата
 
-    private static final int FRAME_W = 300;
-    private static final int FRAME_H = 250;
+    private static final int FRAME_W = 300; // размеры панельных компонентов интерфейса
+    private static final int FRAME_H = 295;
 
     private static final int BTN_PANEL_W = 300;
     private static final int BTN_PANEL_H = 140;
 
     private static final int CALC_PANEL_W = 300;
-    private static final int CALC_PANEL_H = 70;
+    private static final int CALC_PANEL_H = 90;
 
-    private static final String[] BTN_S = {"1", "2" , "3", "+", "4", "5", "6", "-",
+    private static final String[] BTN_S = {"1", "2" , "3", "+", "4", "5", "6", "-", // массив
                                            "7", "8", "9", "/" , "0", "C", "=", "*"};
 
     private static final String[] KEYSTROKES = {"NUMPAD1", "NUMPAD2", "NUMPAD3", "ADD", "NUMPAD4", "NUMPAD5",
                                                 "NUMPAD6", "SUBTRACT", "NUMPAD7", "NUMPAD8", "NUMPAD9",
                                                 "DIVIDE", "NUMPAD0", "BACK_SPACE", "ENTER", "MULTIPLY"
-                                               };
+                                               }; // коды нажимаемых клавиш для формирования KeyStroke
+                                                  // под ActionMap и InputMap
 
-    private static final String[] BTN_SG = {"=", "/" , "-", "*", "+"};
+    private static final String[] BTN_SG = {"=", "/" , "-", "*", "+"}; // операции
 
-    private static final String[] BTN_SG_W_MINUS = {"=", "/" , "*", "-", "+"};
-
-    private static final int SYMBOLS_PER_STR = 13;
+    private static final int SYMBOLS_PER_STR = 13; // кол-во символов выражения в строке при 32-м кегле
 
     public static void main(String[] args){
         EventQueue.invokeLater(() -> {
@@ -61,37 +56,43 @@ public class LevelTwo {
         public MainFrame(){
             setLayout(new BorderLayout());
             setSize(FRAME_W, FRAME_H);
-            setDefaultCloseOperation(EXIT_ON_CLOSE);
+            setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
             setResizable(false);
 
-            btnPanel = new BtnPanel();
-            add(btnPanel, BorderLayout.SOUTH);
+            btnPanel = new BtnPanel(); // введение панели с кнопками
+            add(btnPanel, BorderLayout.SOUTH); // внизу
 
-            calcPanel = new CalcPanel();
-            add(calcPanel, BorderLayout.NORTH);
+            calcPanel = new CalcPanel(); // введение панели-экрана
+            add(calcPanel, BorderLayout.NORTH); // вверху
+            setJMenuBar(new MainMenuBar());
         }
     }
 
-    private static class BtnPanel extends JPanel{
-        private static JButton[] btns = new JButton[16];
-        private static BtnAction[] actions = new BtnAction[16];
+    private static class BtnPanel extends JPanel{ // класс панели с кнопками
+        private static JButton[] btns = new JButton[16]; // 16 кнопок (цифры, операции)
+        private static BtnAction[] actions = new BtnAction[16]; // 16 действий (для кнопок и клавиш)
 
         public BtnPanel(){
-            setLayout(new GridLayout(4, 4));
+            setLayout(new GridLayout(4, 4)); // установка сеточной компоновки 4*4 секции
             int i = 0;
 
-            for (String s : BTN_S) {
+            for (String s : BTN_S) { // создание кнопок
                 actions[i] = new BtnAction(s);
                 btns[i] = new JButton(actions[i]);
                 btns[i].setFont(new Font("Courier New", Font.BOLD, 16));
-                add(btns[i]);
+                add(btns[i]); // последовательная набивка сетки кнопками
                 i++;
             }
-
-            createKeyIAMap();
+            createKeyIAMap(); // установка соответсвия клавишам действий
+            setEnableEqual(false); // логика
         }
 
-        public void setEnableBtns(boolean b){
+        public void setEnableEqual(boolean b){ // логика-блокировка кнопки и действия равенства
+            btns[14].setEnabled(b);
+            actions[14].putValue("enabled", b);
+        }
+
+        public void setEnableBtns(boolean b){ // блокировка/разблокировка всех кроме равенства и очистки
             for (int i = 0; i < 16; i++){
                 btns[i].setEnabled(b);
                 actions[i].putValue("enabled", b);
@@ -99,11 +100,11 @@ public class LevelTwo {
             btns[13].setEnabled(true);
             btns[14].setEnabled(true);
 
-            actions[13].putValue("enabled", true);
+            actions[13].putValue("enabled", true); // отдельный ключ для "блокировки" - enabled
             actions[14].putValue("enabled", true);
         }
 
-        private void createKeyIAMap(){
+        private void createKeyIAMap(){ // метод формирования отображений действие-ключ-клавиша
             ActionMap amap = this.getActionMap();
             InputMap imap = this.getInputMap(WHEN_IN_FOCUSED_WINDOW);
 
@@ -165,13 +166,15 @@ public class LevelTwo {
         private String strRes = "";
         private boolean lastInSGwM;
         private int k = 1;
+        private boolean eqOp = false;
+        private int radix = 10;
 
         @Override
         protected void paintComponent(Graphics g) {
             g.setFont(new Font("Courier New", Font.BOLD, 32 / k));
-            g.drawString(str, 0, 20);
+            g.drawString(str, 0, 25);
             g.setFont(new Font("Courier New", Font.BOLD, 26));
-            g.drawString(strRes, 5, 60);
+            g.drawString(strRes, 5, 65);
         }
 
         public void setStr(String s) throws MaxExpLengthExeption {
@@ -186,6 +189,14 @@ public class LevelTwo {
 
             k = str.length() / SYMBOLS_PER_STR + 1;
 
+            if (eqOp) {
+                str = "";
+                strRes = "";
+                eqOp = false;
+                btnPanel.setEnableEqual(false);
+                repaint();
+            }
+
             if ((s.equals("C")) && (!str.isEmpty())) {
                 if (k == 3) k = 2;
                 str = str.substring(0, str.length()-1);
@@ -197,10 +208,24 @@ public class LevelTwo {
                 throw new MaxExpLengthExeption();
             }
 
-            else if (s.equals("=")){
+            else if (s.equals("=") && !str.isEmpty()){
                 try {
-                    strRes = "=" + calculateExpr(getSplitExpression());
+                    switch (radix){
+                        case 2:
+                            strRes = "=b" + Integer.toBinaryString(calculateExpr(getSplitExpression()));
+                            break;
+                        case 8:
+                            strRes = "=o" + Integer.toOctalString(calculateExpr(getSplitExpression()));
+                            break;
+                        case 10:
+                            strRes = "=" + calculateExpr(getSplitExpression());
+                            break;
+                        case 16:
+                            strRes = "=h" + Integer.toHexString(calculateExpr(getSplitExpression()));
+                            break;
+                    }
                     btnPanel.setEnableBtns(true);
+                    eqOp = true;
                     repaint();
                 } catch (IndexOutOfBoundsException e){
                     JOptionPane.showMessageDialog(mainFrame, "Некорректное выражение", "Допишите", JOptionPane.ERROR_MESSAGE);
@@ -208,14 +233,22 @@ public class LevelTwo {
 
             } else if ((!s.equals("C")) && (str.isEmpty()) && (!Arrays.asList(BTN_SG).contains(s))){
                 str += s;
-                lastInSGwM = Arrays.asList(BTN_SG_W_MINUS).contains(s);
+                lastInSGwM = Arrays.asList(BTN_SG).contains(s);
                 repaint();
             }
-            else if ((!s.equals("C")) &&((!str.isEmpty())) && !(lastInSGwM && Arrays.asList(BTN_SG_W_MINUS).contains(s))){
+            else if ((!s.equals("C")) &&((!str.isEmpty())) && !(lastInSGwM && Arrays.asList(BTN_SG).contains(s))){
                 str += s;
-                lastInSGwM = Arrays.asList(BTN_SG_W_MINUS).contains(s);
+                lastInSGwM = Arrays.asList(BTN_SG).contains(s);
                 repaint();
             }
+
+            if (str.length() == 0){
+                btnPanel.setEnableEqual(false);
+            } else btnPanel.setEnableEqual(true);
+        }
+
+        private void setRadix(int r){
+            radix = r;
         }
 
         private ArrayList<String> getSplitExpression(){
@@ -224,9 +257,7 @@ public class LevelTwo {
             return new ArrayList<>(List.of(splittedStr));
         }
 
-        private String calculateExpr(ArrayList<String> sA){
-            Iterator<String> iter = sA.iterator();
-
+        private int calculateExpr(ArrayList<String> sA){
             String current = "";
             String next = "";
             String nextOp = "";
@@ -267,6 +298,7 @@ public class LevelTwo {
             }
 
             i = 0;
+            l = sA.size();
             while (i < l){
                 current = sA.get(i);
                 char lastChar = current.charAt(current.length()-1);
@@ -289,12 +321,13 @@ public class LevelTwo {
                         sA.set(i, res + nextOp);
                         l--;
                         i=0;
+                        break;
                     default:
                         i++;
                 }
                 System.out.println(sA);
             }
-            return sA.get(0);
+            return Integer.parseInt(sA.get(0));
         }
 
         @Override
@@ -307,6 +340,55 @@ public class LevelTwo {
         @Override
         public String getMessage() {
             return "Превышена максимальная длина выражения";
+        }
+    }
+
+    private static class MainMenuBar extends JMenuBar{
+
+        private final int[] items = {2, 8, 10, 16};
+
+        public MainMenuBar(){
+            JMenuItem item = null;
+            JRadioButtonMenuItem radioItem = null;
+            ButtonGroup group = new ButtonGroup();
+
+            JMenu exitMenu = new JMenu("Файл");
+            JMenu numSysMenu = new JMenu("СисСчис");
+
+            JMenuItem exitItem = new JMenuItem("Закрыть");
+            JMenuItem aboutItem = new JMenuItem("О программе");
+
+            for (int i : items){
+
+                radioItem = new JRadioButtonMenuItem(Integer.toString(i));
+                group.add(radioItem);
+                if (i == 10) radioItem.setSelected(true);
+
+                radioItem.addActionListener((e) -> {
+                    screenComponent.setRadix(i);
+                    System.out.println(i);
+                });
+                numSysMenu.add(radioItem);
+            }
+
+            exitItem.addActionListener((e) -> {
+                if (JOptionPane.showConfirmDialog(mainFrame, "Выйти?", "Выход", JOptionPane.YES_NO_OPTION,
+                        JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION)
+                    System.exit(0);
+            });
+
+            aboutItem.addActionListener((e) -> {
+                JOptionPane.showMessageDialog(mainFrame,
+                        "Демонстрация применения граничной компоновки на примере калькулятора с на" +
+                                "выполненни арифметических операций в очередном порядке",
+                        "О программе", JOptionPane.INFORMATION_MESSAGE);
+            });
+
+            exitMenu.add(exitItem);
+            exitMenu.add(aboutItem);
+
+            add(exitMenu);
+            add(numSysMenu);
         }
     }
 }
