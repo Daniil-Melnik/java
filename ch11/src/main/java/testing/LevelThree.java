@@ -4,6 +4,12 @@
 - заполнить панель 8-ю кнопками, одну клетку оставить свободной
 - реализовать логику функционирования игры
 - добавить строку меню с возможностью генерации новой обстановки, загрузки и сохранения в файл
+
+= ЛОГИКА
+- реализовать проверку возможности хода при нажатии на кнопку
+- реализовать перемещение на массиве
+- реализовать перерисовку по полю
+
 */
 
 // добавить кнопки и логику
@@ -26,6 +32,7 @@ public class LevelThree {
 
     private static MainFrame mainFrame;
     private static GamePanel gamePanel;
+    private static GameLogic gameLogic;
 
     public static void main(String... args){
         EventQueue.invokeLater(() -> {
@@ -42,6 +49,7 @@ public class LevelThree {
             setDefaultCloseOperation(EXIT_ON_CLOSE);
             setSize(FRAME_W, FRAME_H);
 
+            gameLogic = new GameLogic();
             gamePanel = new GamePanel();
             add(gamePanel, BorderLayout.SOUTH);
         }
@@ -50,8 +58,13 @@ public class LevelThree {
     private static class GamePanel extends JPanel{
 
         public GamePanel(){
-            setLayout(new GridLayout());
+            int i = 0;
+            setLayout(new GridLayout(3, 3));
             setBackground(Color.GREEN);
+            for (String s : gameLogic.getField()){
+                add(!s.equals("*") ? new GameButton(i / 3, i % 3, s) : new JPanel());
+                i++;
+            }
         }
 
         @Override
@@ -81,7 +94,7 @@ public class LevelThree {
     }
 
     private static class GameLogic{
-        private String[] field = {"3", "6", "1", "4", "5", "2", "7", "8", "*"};
+        private String[] field = {"1", "2", "3", "4", "5", "6", "7", "8", "*"};
         private HashMap<String, HashSet<String>> enabledPositions = new HashMap<>();
         private ArrayList<String> currentEnPos;
         private int zeroIndex = 8;
@@ -106,6 +119,4 @@ public class LevelThree {
             return field;
         }
     }
-
-
 }
