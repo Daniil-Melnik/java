@@ -12,7 +12,10 @@
 
 */
 
-// добавить кнопки и логику
+// генерация случайной позиции
+// с учетом позиции звезда и картой
+
+// проверка на победу
 
 package testing;
 
@@ -55,6 +58,7 @@ public class LevelThree {
 
     private static class GamePanel extends JPanel{
         private ArrayList<GameButton> btns = new ArrayList<>(8);
+        private JPanel star = new JPanel();
 
         public GamePanel(){
             int i = 0;
@@ -62,28 +66,35 @@ public class LevelThree {
             setBackground(Color.GREEN);
             for (String s : gameLogic.getField()){
                 if (!s.equals("*")){
-                    btns.add(new GameButton(i / 3, i % 3, s));
-                }
+                    add(new GameButton(i / 3, i % 3, s));
+                } else
+                    add(new JPanel());
                 i++;
             }
+        }
 
-            rePaintButtons();
+        public void paintButtons(){
+
         }
 
         public void rePaintButtons(){
-            for (int i = 0; i < 8; i++){
-                remove(btns.get(i));
-            }
+            int i = 0;
 
-            btns.sort((o1, o2) -> {
-                int posObj = o2.posX * 3 + o2.posY;
-                int posThis = o1.posX * 3 + o1.posY;
-                return posThis - posObj;
-            });
+            gamePanel.removeAll();
+            gamePanel.revalidate();
+            gamePanel.repaint();
 
-            for (int i = 0; i < 8; i++){
-                add(btns.get(i));
+            for (String s : gameLogic.getField()){
+                if (!s.equals("*")){
+                    gamePanel.add(new GameButton(i / 3, i % 3, s));
+                } else {
+                    gamePanel.add(new JPanel());
+                }
+
+                i++;
             }
+            gamePanel.revalidate();
+            gamePanel.repaint();
         }
 
         @Override
@@ -100,7 +111,10 @@ public class LevelThree {
             super(val);
             posX = x;
             posY = y;
-            addActionListener((e) -> gameLogic.move(this));
+            addActionListener((e) -> {
+                gameLogic.move(this);
+                gamePanel.rePaintButtons();
+            });
         }
 
         public void setPosition(int nX, int nY){
@@ -125,10 +139,11 @@ public class LevelThree {
     }
 
     private static class GameLogic{
-        private String[] field = {"1", "2", "3", "4", "5", "6", "7", "8", "*"};
-        private HashMap<Integer, HashSet<String>> enabledPositions = new HashMap<>();
+        //private String[] field = {"1", "2", "3", "4", "5", "6", "7", "8", "*"};
+        private String[] field = {"5", "*", "2", "8", "1", "7", "4", "6", "3"};
+        private final HashMap<Integer, HashSet<String>> enabledPositions = new HashMap<>();
         private ArrayList<String> currentEnPos;
-        private int zeroIndex = 8;
+        private int zeroIndex = 1;
 
         public GameLogic(){
             enabledPositions.put(0, new HashSet<>(List.of("1", "3")));
@@ -144,8 +159,13 @@ public class LevelThree {
 
         public void move(GameButton btn){
             int btnPos = btn.getIndex();
+            System.out.println(btn.getIndex());
             if (enabledPositions.get(zeroIndex).contains(btnPos + "")){
-                System.out.println("Можно!!!");
+                System.out.println(zeroIndex + " " + btnPos);
+                btn.setPosition(zeroIndex / 3, zeroIndex % 3);
+                field[zeroIndex] = btn.getVal();
+                field[btnPos] = "*";
+                zeroIndex = btnPos;
             } else {
                 System.out.println("Нельзя");
             }
