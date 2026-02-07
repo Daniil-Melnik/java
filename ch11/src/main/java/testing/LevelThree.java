@@ -18,9 +18,7 @@ package testing;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.*;
 import java.util.List;
 
 public class LevelThree {
@@ -56,14 +54,35 @@ public class LevelThree {
     }
 
     private static class GamePanel extends JPanel{
+        private ArrayList<GameButton> btns = new ArrayList<>(8);
 
         public GamePanel(){
             int i = 0;
             setLayout(new GridLayout(3, 3));
             setBackground(Color.GREEN);
             for (String s : gameLogic.getField()){
-                add(!s.equals("*") ? new GameButton(i / 3, i % 3, s) : new JPanel());
+                if (!s.equals("*")){
+                    btns.add(new GameButton(i / 3, i % 3, s));
+                }
                 i++;
+            }
+
+            rePaintButtons();
+        }
+
+        public void rePaintButtons(){
+            for (int i = 0; i < 8; i++){
+                remove(btns.get(i));
+            }
+
+            btns.sort((o1, o2) -> {
+                int posObj = o2.posX * 3 + o2.posY;
+                int posThis = o1.posX * 3 + o1.posY;
+                return posThis - posObj;
+            });
+
+            for (int i = 0; i < 8; i++){
+                add(btns.get(i));
             }
         }
 
@@ -73,7 +92,7 @@ public class LevelThree {
         }
     }
 
-    private static class GameButton extends JButton{
+    private static class GameButton extends JButton implements Comparable<GameButton>{
         private int posX;
         private int posY;
 
@@ -81,6 +100,7 @@ public class LevelThree {
             super(val);
             posX = x;
             posY = y;
+            addActionListener((e) -> gameLogic.move(this));
         }
 
         public void setPosition(int nX, int nY){
@@ -88,31 +108,47 @@ public class LevelThree {
             posX = nX;
         }
 
+        public int getIndex(){
+            return posX*3 + posY;
+        }
+
         public String getVal(){
             return super.getText();
+        }
+
+        @Override
+        public int compareTo(GameButton o) {
+            int posObj = o.posX * 3 + o.posY;
+            int posThis = this.posX * 3 + this.posY;
+            return posThis - posObj;
         }
     }
 
     private static class GameLogic{
         private String[] field = {"1", "2", "3", "4", "5", "6", "7", "8", "*"};
-        private HashMap<String, HashSet<String>> enabledPositions = new HashMap<>();
+        private HashMap<Integer, HashSet<String>> enabledPositions = new HashMap<>();
         private ArrayList<String> currentEnPos;
         private int zeroIndex = 8;
 
         public GameLogic(){
-            enabledPositions.put("0", new HashSet<>(List.of("1", "3")));
-            enabledPositions.put("1", new HashSet<>(List.of("0", "2", "4")));
-            enabledPositions.put("2", new HashSet<>(List.of("1", "5")));
-            enabledPositions.put("3", new HashSet<>(List.of("0", "4", "6")));
-            enabledPositions.put("4", new HashSet<>(List.of("1", "3", "5", "7")));
-            enabledPositions.put("5", new HashSet<>(List.of("8", "4", "2")));
-            enabledPositions.put("6", new HashSet<>(List.of("3", "7")));
-            enabledPositions.put("7", new HashSet<>(List.of("6", "4", "8")));
-            enabledPositions.put("8", new HashSet<>(List.of("7", "5")));
+            enabledPositions.put(0, new HashSet<>(List.of("1", "3")));
+            enabledPositions.put(1, new HashSet<>(List.of("0", "2", "4")));
+            enabledPositions.put(2, new HashSet<>(List.of("1", "5")));
+            enabledPositions.put(3, new HashSet<>(List.of("0", "4", "6")));
+            enabledPositions.put(4, new HashSet<>(List.of("1", "3", "5", "7")));
+            enabledPositions.put(5, new HashSet<>(List.of("8", "4", "2")));
+            enabledPositions.put(6, new HashSet<>(List.of("3", "7")));
+            enabledPositions.put(7, new HashSet<>(List.of("6", "4", "8")));
+            enabledPositions.put(8, new HashSet<>(List.of("7", "5")));
         }
 
-        public void move(){
-
+        public void move(GameButton btn){
+            int btnPos = btn.getIndex();
+            if (enabledPositions.get(zeroIndex).contains(btnPos + "")){
+                System.out.println("Можно!!!");
+            } else {
+                System.out.println("Нельзя");
+            }
         }
 
         public String[] getField(){
