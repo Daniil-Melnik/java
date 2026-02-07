@@ -15,7 +15,7 @@
 // генерация случайной позиции
 // с учетом позиции звезда и картой
 
-// проверка на победу
+// меню загрузки и сохранения игры
 
 package testing;
 
@@ -25,7 +25,7 @@ import java.util.*;
 import java.util.List;
 
 public class LevelThree {
-    private static final int FRAME_H = 400;
+    private static final int FRAME_H = 415;
     private static final int FRAME_W = 360;
 
     private static final int GAME_PAN_H = 360;
@@ -47,54 +47,58 @@ public class LevelThree {
     private static class MainFrame extends JFrame{
         public MainFrame(){
             setLayout(new BorderLayout());
-            setDefaultCloseOperation(EXIT_ON_CLOSE);
+            setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
             setSize(FRAME_W, FRAME_H);
 
             gameLogic = new GameLogic();
             gamePanel = new GamePanel();
             add(gamePanel, BorderLayout.SOUTH);
+
+            setJMenuBar(new MainMenuBar());
         }
     }
 
     private static class GamePanel extends JPanel{
-        private ArrayList<GameButton> btns = new ArrayList<>(8);
-        private JPanel star = new JPanel();
+        public static Map<String, Color> colors = Map.of(
+                "1", new Color(85,85,255),
+                "2", new Color(254,1,154),
+                "3", new Color(57,255,20),
+                "4", new Color(188,19,254),
+                "5", new Color(4,217,255),
+                "6", new Color(248,0,0),
+                "7", new Color(204,255,0),
+                "8", new Color(255,164,32)
+        );
 
         public GamePanel(){
             int i = 0;
             setLayout(new GridLayout(3, 3));
-            setBackground(Color.GREEN);
-            for (String s : gameLogic.getField()){
-                if (!s.equals("*")){
-                    add(new GameButton(i / 3, i % 3, s));
-                } else
-                    add(new JPanel());
-                i++;
-            }
-        }
-
-        public void paintButtons(){
-
+            rePaintButtons();
         }
 
         public void rePaintButtons(){
             int i = 0;
 
-            gamePanel.removeAll();
-            gamePanel.revalidate();
-            gamePanel.repaint();
+            removeAll();
+            revalidate();
+            repaint();
+
+            GameButton btn;
 
             for (String s : gameLogic.getField()){
                 if (!s.equals("*")){
-                    gamePanel.add(new GameButton(i / 3, i % 3, s));
+                    btn = new GameButton(i / 3, i % 3, s);
+                    btn.setFont(new Font("Arial", Font.BOLD, 64));
+                    btn.setBackground(colors.get(s));
+                    add(btn);
                 } else {
-                    gamePanel.add(new JPanel());
+                    add(new JPanel());
                 }
 
                 i++;
             }
-            gamePanel.revalidate();
-            gamePanel.repaint();
+            revalidate();
+            repaint();
         }
 
         @Override
@@ -114,7 +118,11 @@ public class LevelThree {
             addActionListener((e) -> {
                 gameLogic.move(this);
                 gamePanel.rePaintButtons();
+                if (gameLogic.isWin()){
+                    JOptionPane.showMessageDialog(mainFrame, "Игра выиграна!");
+                }
             });
+            setBackground(Color.BLUE);
         }
 
         public void setPosition(int nX, int nY){
@@ -139,11 +147,10 @@ public class LevelThree {
     }
 
     private static class GameLogic{
-        //private String[] field = {"1", "2", "3", "4", "5", "6", "7", "8", "*"};
-        private String[] field = {"5", "*", "2", "8", "1", "7", "4", "6", "3"};
+        private String[] field = {"1", "2", "3", "4", "5", "6", "7", "*", "8"};
+        private String[] winField = {"1", "2", "3", "4", "5", "6", "7", "8", "*"};
         private final HashMap<Integer, HashSet<String>> enabledPositions = new HashMap<>();
-        private ArrayList<String> currentEnPos;
-        private int zeroIndex = 1;
+        private int zeroIndex = 7;
 
         public GameLogic(){
             enabledPositions.put(0, new HashSet<>(List.of("1", "3")));
@@ -166,13 +173,59 @@ public class LevelThree {
                 field[zeroIndex] = btn.getVal();
                 field[btnPos] = "*";
                 zeroIndex = btnPos;
-            } else {
-                System.out.println("Нельзя");
             }
+        }
+
+        public void shuffleField(){
+            zeroIndex = 0;
+
+            Collections.shuffle(Arrays.asList(field));
+            while (!field[zeroIndex].equals("*")) zeroIndex++;
+        }
+
+        public boolean isWin(){
+            return Arrays.equals(field, winField);
         }
 
         public String[] getField(){
             return field;
+        }
+    }
+
+    private static class MainMenuBar extends JMenuBar{
+
+        public MainMenuBar(){
+            JMenu mainMenu = new JMenu("Файл");
+            JMenu gameMenu = new JMenu("Игра");
+
+            JMenuItem exitItem = new JMenuItem("Выход");
+            JMenuItem aboutItem = new JMenuItem("О программе");
+
+            JMenuItem newGameItem = new JMenuItem("Новая");
+            JMenuItem saveGameItem = new JMenuItem("Сохранить");
+            JMenuItem loadGameItem = new JMenuItem("Загрузить");
+
+            newGameItem.addActionListener((e) -> {
+                gameLogic.shuffleField();
+                gamePanel.rePaintButtons();
+            });
+
+            exitItem.addActionListener((e) -> System.exit(0));
+            aboutItem.addActionListener((e) -> JOptionPane.showMessageDialog(mainFrame, "Игра Пятнашка на 9 клеток"));
+
+            saveGameItem.addActionListener((e) -> {
+
+            });
+
+            mainMenu.add(exitItem);
+            mainMenu.add(aboutItem);
+
+            gameMenu.add(newGameItem);
+            gameMenu.add(saveGameItem);
+            gameMenu.add(loadGameItem);
+
+            add(mainMenu);
+            add(gameMenu);
         }
     }
 }
