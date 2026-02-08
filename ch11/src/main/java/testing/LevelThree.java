@@ -51,6 +51,11 @@ public class LevelThree {
             setLayout(new BorderLayout());
             setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
             setSize(FRAME_W, FRAME_H);
+            setTitle("Пятнашки");
+            setIconImage(
+                    new ImageIcon(
+                    Objects.requireNonNull(this.getClass().getResource("/rubik.png"))
+                    ).getImage());
 
             gameLogic = new GameLogic();
             gamePanel = new GamePanel();
@@ -210,15 +215,25 @@ public class LevelThree {
             BufferedReader reader = new BufferedReader(new FileReader(file));
             String [] newField = new String[9];
 
-            try {
+            try (reader){
                 for (int i = 0; i < 9; i++){
                     newField[i] = reader.readLine();
-            }
+                }
             } catch (IOException e){
                 JOptionPane.showMessageDialog(mainFrame, "Некорректный файл", "Ошибка файла", JOptionPane.ERROR_MESSAGE);
             }
-
+            System.out.println(Arrays.toString(newField));
             return newField;
+        }
+
+        public static void saveFieldToFile(File file) throws IOException {
+            BufferedWriter writer = new BufferedWriter((new FileWriter(file)));
+            try (writer) {
+                for (String s : gameLogic.getField()) writer.write(s + "\n");
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(mainFrame, "Ошибка записи в файл", "Ошибка записи", JOptionPane.ERROR_MESSAGE);
+            }
+
         }
     }
 
@@ -246,7 +261,18 @@ public class LevelThree {
             aboutItem.addActionListener((e) -> JOptionPane.showMessageDialog(mainFrame, "Игра Пятнашка на 9 клеток"));
 
             saveGameItem.addActionListener((e) -> {
-
+                JFileChooser chooser = new JFileChooser();
+                Date date = new Date();
+                chooser.setFileFilter(new FileNameExtensionFilter("game files - txt", "txt"));
+                chooser.setSelectedFile(new File(String.format("game_%tY%tm%td_%tH%tM%tS.txt", date, date, date, date, date, date)));
+                chooser.setAcceptAllFileFilterUsed(false);
+                if (chooser.showSaveDialog(mainFrame) == JFileChooser.APPROVE_OPTION){
+                    try {
+                        FileUtil.saveFieldToFile(chooser.getSelectedFile());
+                    } catch (IOException ex) {
+                        JOptionPane.showMessageDialog(mainFrame, "Ошибка записи в файл", "Ошибка записи", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
             });
 
             loadGameItem.addActionListener((e) -> {
@@ -256,13 +282,14 @@ public class LevelThree {
                 if (chooser.showOpenDialog(mainFrame) == JFileChooser.APPROVE_OPTION){
                     try {
                         gameLogic.setField(FileUtil.getFieldFromFile(chooser.getSelectedFile()));
-                        gameLogic.setZeroIndexByField();
                         gamePanel.rePaintButtons();
+                        gameLogic.setZeroIndexByField();
                     } catch (FileNotFoundException ex) {
                         JOptionPane.showMessageDialog(mainFrame, "Файл пропал!", "Ошибка файла", JOptionPane.ERROR_MESSAGE);
                     }
                 }
             });
+
 
             mainMenu.add(exitItem);
             mainMenu.add(aboutItem);
