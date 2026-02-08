@@ -20,7 +20,9 @@
 package testing;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
+import java.io.*;
 import java.util.*;
 import java.util.List;
 
@@ -180,7 +182,7 @@ public class LevelThree {
             zeroIndex = 0;
 
             Collections.shuffle(Arrays.asList(field));
-            while (!field[zeroIndex].equals("*")) zeroIndex++;
+            setZeroIndexByField();
         }
 
         public boolean isWin(){
@@ -190,6 +192,34 @@ public class LevelThree {
         public String[] getField(){
             return field;
         }
+
+        public void setField(String[] f) {
+            field = f;
+        }
+
+        public void setZeroIndexByField(){
+            zeroIndex = 0;
+            while (!field[zeroIndex].equals("*")) zeroIndex++;
+        }
+    }
+
+    private static class FileUtil{
+
+        public static String[] getFieldFromFile(File file) throws FileNotFoundException {
+
+            BufferedReader reader = new BufferedReader(new FileReader(file));
+            String [] newField = new String[9];
+
+            try {
+                for (int i = 0; i < 9; i++){
+                    newField[i] = reader.readLine();
+            }
+            } catch (IOException e){
+                JOptionPane.showMessageDialog(mainFrame, "Некорректный файл", "Ошибка файла", JOptionPane.ERROR_MESSAGE);
+            }
+
+            return newField;
+        }
     }
 
     private static class MainMenuBar extends JMenuBar{
@@ -198,10 +228,12 @@ public class LevelThree {
             JMenu mainMenu = new JMenu("Файл");
             JMenu gameMenu = new JMenu("Игра");
 
+            JMenu newGameMenu = new JMenu("Новая");
+
             JMenuItem exitItem = new JMenuItem("Выход");
             JMenuItem aboutItem = new JMenuItem("О программе");
 
-            JMenuItem newGameItem = new JMenuItem("Новая");
+            JMenuItem newGameItem = new JMenuItem("Случайная");
             JMenuItem saveGameItem = new JMenuItem("Сохранить");
             JMenuItem loadGameItem = new JMenuItem("Загрузить");
 
@@ -217,12 +249,30 @@ public class LevelThree {
 
             });
 
+            loadGameItem.addActionListener((e) -> {
+                JFileChooser chooser = new JFileChooser();
+                chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+                chooser.setFileFilter(new FileNameExtensionFilter("game files", "txt"));
+                if (chooser.showOpenDialog(mainFrame) == JFileChooser.APPROVE_OPTION){
+                    try {
+                        gameLogic.setField(FileUtil.getFieldFromFile(chooser.getSelectedFile()));
+                        gameLogic.setZeroIndexByField();
+                        gamePanel.rePaintButtons();
+                    } catch (FileNotFoundException ex) {
+                        JOptionPane.showMessageDialog(mainFrame, "Файл пропал!", "Ошибка файла", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            });
+
             mainMenu.add(exitItem);
             mainMenu.add(aboutItem);
 
-            gameMenu.add(newGameItem);
+            newGameMenu.add(newGameItem);
+            newGameMenu.add(loadGameItem);
+
+            gameMenu.add(newGameMenu);
+            gameMenu.addSeparator();
             gameMenu.add(saveGameItem);
-            gameMenu.add(loadGameItem);
 
             add(mainMenu);
             add(gameMenu);
