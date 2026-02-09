@@ -12,11 +12,6 @@
 
 */
 
-// генерация случайной позиции
-// с учетом позиции звезда и картой
-
-// меню загрузки и сохранения игры
-
 package testing;
 
 import javax.swing.*;
@@ -27,15 +22,15 @@ import java.util.*;
 import java.util.List;
 
 public class LevelThree {
-    private static final int FRAME_H = 415;
+    private static final int FRAME_H = 415; // константы размеров элементов интерфейса
     private static final int FRAME_W = 360;
 
     private static final int GAME_PAN_H = 360;
     private static final int GAME_PAN_W = 360;
 
-    private static MainFrame mainFrame;
-    private static GamePanel gamePanel;
-    private static GameLogic gameLogic;
+    private static MainFrame mainFrame; // поле главного (единственного) окна
+    private static GamePanel gamePanel; // поле игровой панели с, непосредственно, кнопками
+    private static GameLogic gameLogic; // поле экземпляра реализации игровой логики
 
     public static void main(String... args){
         EventQueue.invokeLater(() -> {
@@ -46,7 +41,7 @@ public class LevelThree {
 
 
 
-    private static class MainFrame extends JFrame{
+    private static class MainFrame extends JFrame{ // главное окно
         public MainFrame(){
             setLayout(new BorderLayout());
             setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -58,17 +53,17 @@ public class LevelThree {
                     Objects.requireNonNull(this.getClass().getResource("/rubik.png"))
                     ).getImage());
 
-            gameLogic = new GameLogic();
+            gameLogic = new GameLogic(); // создание экземпляров игровой панели и логики
             gamePanel = new GamePanel();
             add(gamePanel, BorderLayout.SOUTH);
 
-            setJMenuBar(new MainMenuBar());
+            setJMenuBar(new MainMenuBar()); // добавление строки меню
         }
     }
 
-    private static class GamePanel extends JPanel{
-        public static Map<String, Color> colors = Map.of(
-                "1", new Color(85,85,255),
+    private static class GamePanel extends JPanel{ // класс описания интерфейса - игровой панели с кнопками
+        public static Map<String, Color> colors = Map.of( // отображение "цифра - цвет" для индивидуальной
+                "1", new Color(85,85,255),       // окраски костяшек
                 "2", new Color(254,1,154),
                 "3", new Color(57,255,20),
                 "4", new Color(188,19,254),
@@ -79,33 +74,32 @@ public class LevelThree {
         );
 
         public GamePanel(){
-            int i = 0;
-            setLayout(new GridLayout(3, 3));
-            rePaintButtons();
+            setLayout(new GridLayout(3, 3)); // установка сеточной компоновки
+            rePaintButtons(); // первичная отрисовка кнопок
         }
 
-        public void rePaintButtons(){
-            int i = 0;
+        public void rePaintButtons(){ // метод отрисовк игрового поля состоящего из 8-ми спец. кнопок
+            int i = 0;                // и 1 пустого места
 
-            removeAll();
-            revalidate();
+            removeAll(); // первичная очистка поля от всего (для повторной отрисовки)
+            revalidate(); // обновление интерфейса
             repaint();
 
             GameButton btn;
 
-            for (String s : gameLogic.getField()){
-                if (!s.equals("*")){
+            for (String s : gameLogic.getField()){ // перебор поля из экземпляра логики
+                if (!s.equals("*")){               // все что не "*" - создание кнопки с установкой её положения
                     btn = new GameButton(i / 3, i % 3, s);
                     btn.setFont(new Font("Arial", Font.BOLD, 64));
-                    btn.setBackground(colors.get(s));
+                    btn.setBackground(colors.get(s)); // выбор цвета из отображения выше
                     add(btn);
-                } else {
+                } else { // если "*" - добавить пустое место в виде панели
                     add(new JPanel());
                 }
 
-                i++;
+                i++; // непрерывный на пустоту счётчик для установки координат в кнопке
             }
-            revalidate();
+            revalidate(); // пересчет интерфейса
             repaint();
         }
 
