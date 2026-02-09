@@ -109,36 +109,35 @@ public class LevelThree {
         }
     }
 
-    private static class GameButton extends JButton implements Comparable<GameButton>{
-        private int posX;
+    private static class GameButton extends JButton implements Comparable<GameButton>{ // игровая кнопка
+        private int posX; // хранит свою позицию в сетке
         private int posY;
 
-        public GameButton(int x, int y, String val){
+        public GameButton(int x, int y, String val){ // конструирование по тексту
             super(val);
             posX = x;
             posY = y;
-            addActionListener((e) -> {
-                gameLogic.move(this);
-                gamePanel.rePaintButtons();
-                if (gameLogic.isWin()){
+            addActionListener((e) -> { // при нажатии выполняется ход
+                gameLogic.move(this); // ход по игровой логике
+                gamePanel.rePaintButtons(); // перерисовка после хода
+                if (gameLogic.isWin()){ // если состояние поля выигрышное - сообщение о выигрыше
                     JOptionPane.showMessageDialog(mainFrame, "Игра выиграна!");
                 }
             });
-            setBackground(Color.BLUE);
         }
 
-        public void setPosition(int nX, int nY){
+        public void setPosition(int nX, int nY){ // установка новой позиции в сетке
             posY = nY;
             posX = nX;
         }
 
-        public int getIndex(){
+        public int getIndex(){ // получение номера в массиве поля
             return posX*3 + posY;
         }
 
         public String getVal(){
             return super.getText();
-        }
+        } // получить тектовое значение - цифру
 
         @Override
         public int compareTo(GameButton o) {
@@ -148,13 +147,23 @@ public class LevelThree {
         }
     }
 
-    private static class GameLogic{
-        private String[] field = {"1", "2", "3", "4", "5", "6", "7", "*", "8"};
-        private String[] winField = {"1", "2", "3", "4", "5", "6", "7", "8", "*"};
-        private final HashMap<Integer, HashSet<String>> enabledPositions = new HashMap<>();
-        private int zeroIndex = 7;
+    // игровая логика
+    // хранение поля в виде массива строк - цифр и * (пустоты)
+    // ходы и отрисовка выполняются строго по состоянию массива
 
-        public GameLogic(){
+    private static class GameLogic{
+        private String[] field = {"1", "2", "3", "4", "5", "6", "7", "*", "8"}; // массив - представление поля
+                                                                                // поле инициализируется массивом по умолчанию
+
+        private static final String[] winField = {"1", "2", "3", "4", "5", "6", "7", "8", "*"}; // выигрышное состояние поля
+
+        private static final HashMap<Integer, HashSet<String>> enabledPositions = new HashMap<>(); // отображение правил ходов
+                                                 // индекс пустого места - множество разрешенных соседних индексов
+                                                 // для занятия пустоты. Индексы в массиве поля.
+
+        private int zeroIndex = 7; // индекс в массиве занимаемый пустотой
+
+        public GameLogic(){ // заполнение отображения правил движения кнопок на пустое место
             enabledPositions.put(0, new HashSet<>(List.of("1", "3")));
             enabledPositions.put(1, new HashSet<>(List.of("0", "2", "4")));
             enabledPositions.put(2, new HashSet<>(List.of("1", "5")));
@@ -166,26 +175,27 @@ public class LevelThree {
             enabledPositions.put(8, new HashSet<>(List.of("7", "5")));
         }
 
-        public void move(GameButton btn){
-            int btnPos = btn.getIndex();
-            if (enabledPositions.get(zeroIndex).contains(btnPos + "")){
-                btn.setPosition(zeroIndex / 3, zeroIndex % 3);
-                field[zeroIndex] = btn.getVal();
-                field[btnPos] = "*";
-                zeroIndex = btnPos;
+        public void move(GameButton btn){ // выполнение хода по массиву поля
+            int btnPos = btn.getIndex(); // вычисление индекса нажатой кнопки в массиве поля
+            if (enabledPositions.get(zeroIndex).contains(btnPos + "")){ // если с нажатой кнопки можно пройти в пустоту
+                btn.setPosition(zeroIndex / 3, zeroIndex % 3); // установка в кнопку:
+                                                              // новая позиция кнопки - старая позиция пустоты
+                field[zeroIndex] = btn.getVal(); // в массиве поля на место * - цифру кнопки
+                field[btnPos] = "*"; // в массиве поля на место цифры кнопки - *
+                zeroIndex = btnPos; // обновление индекса пустого места в массиве поля
             }
         }
 
-        public void shuffleField(){
+        public void shuffleField(){ // перемешивание поля для случайной новой игры
             zeroIndex = 0;
 
-            Collections.shuffle(Arrays.asList(field));
-            setZeroIndexByField();
+            Collections.shuffle(Arrays.asList(field)); // перетасовка массива поля
+            setZeroIndexByField(); // установка индекса пустоты по новому полю
         }
 
         public boolean isWin(){
             return Arrays.equals(field, winField);
-        }
+        } // проверка на победу
 
         public String[] getField(){
             return field;
@@ -195,21 +205,22 @@ public class LevelThree {
             field = f;
         }
 
-        public void setZeroIndexByField(){
+        public void setZeroIndexByField(){ // поиск пустоты * в массиве поля
             zeroIndex = 0;
             while (!field[zeroIndex].equals("*")) zeroIndex++;
         }
 
-        public static boolean isCorrectField(String[] testField){
+        public static boolean isCorrectField(String[] testField){ // проверка корректности полученного в массиве поля
+                                                                  // костыль - применяется для защиты от чтения не того файла
             String[] correctSortedField = {"*", "1", "2", "3", "4", "5", "6", "7", "8"};
             Arrays.sort(testField);
             return Arrays.equals(testField, correctSortedField);
         }
     }
 
-    private static class FileUtil{
+    private static class FileUtil{ // методы для работы с файлами: сохранением и загрузкой состояния поля
 
-        public static String[] getFieldFromFile(File file) throws FileNotFoundException {
+        public static String[] getFieldFromFile(File file) throws FileNotFoundException { // прочитать поле из файла
             boolean result;
             BufferedReader reader = new BufferedReader(new FileReader(file));
             String [] newField = new String[9];
@@ -221,13 +232,12 @@ public class LevelThree {
             } catch (IOException e){
                 JOptionPane.showMessageDialog(mainFrame, "Некорректный файл", "Ошибка файла", JOptionPane.ERROR_MESSAGE);
             }
-            System.out.println(GameLogic.isCorrectField(newField));
             result = GameLogic.isCorrectField(Arrays.copyOf(newField, newField.length));
             if (!result) JOptionPane.showMessageDialog(mainFrame, "Некорректный файл", "ошибка файла", JOptionPane.INFORMATION_MESSAGE);
             return result ? newField : gameLogic.getField();
         }
 
-        public static void saveFieldToFile(File file) throws IOException {
+        public static void saveFieldToFile(File file) throws IOException { // сохранить поле в файл
             BufferedWriter writer = new BufferedWriter((new FileWriter(file)));
             try (writer) {
                 for (String s : gameLogic.getField()) writer.write(s + "\n");
@@ -238,7 +248,7 @@ public class LevelThree {
         }
     }
 
-    private static class MainMenuBar extends JMenuBar{
+    private static class MainMenuBar extends JMenuBar{ // строка главного меню
 
         public MainMenuBar(){
             JMenu mainMenu = new JMenu("Файл");
@@ -253,39 +263,41 @@ public class LevelThree {
             JMenuItem saveGameItem = new JMenuItem("Сохранить");
             JMenuItem loadGameItem = new JMenuItem("Загрузить");
 
-            newGameItem.addActionListener((e) -> {
-                gameLogic.shuffleField();
-                gamePanel.rePaintButtons();
+            newGameItem.addActionListener((e) -> { // новая случайная игра
+                gameLogic.shuffleField(); // перемешать текущее поле
+                gamePanel.rePaintButtons(); // перерисовать кнопки в соответсвии с полем
             });
 
             exitItem.addActionListener((e) -> System.exit(0));
             aboutItem.addActionListener((e) -> JOptionPane.showMessageDialog(mainFrame, "Игра Пятнашка на 9 клеток"));
 
-            saveGameItem.addActionListener((e) -> {
-                JFileChooser chooser = new JFileChooser();
-                Date date = new Date();
+            saveGameItem.addActionListener((e) -> { // сохранение игры
+                JFileChooser chooser = new JFileChooser(); // применение диалога выбора файлов
+                Date date = new Date(); // объект даты для формирования уникального имени файла сохранения
                 chooser.setFileFilter(new FileNameExtensionFilter("game files - txt", "txt"));
                 chooser.setSelectedFile(new File(String.format("game_%tY%tm%td_%tH%tM%tS.txt", date, date, date, date, date, date)));
+                                    // имя по умолчанию
+
                 chooser.setAcceptAllFileFilterUsed(false);
                 if (chooser.showSaveDialog(mainFrame) == JFileChooser.APPROVE_OPTION){
                     try {
-                        FileUtil.saveFieldToFile(chooser.getSelectedFile());
+                        FileUtil.saveFieldToFile(chooser.getSelectedFile()); // печать состояния поля в файл
                     } catch (IOException ex) {
                         JOptionPane.showMessageDialog(mainFrame, "Ошибка записи в файл", "Ошибка записи", JOptionPane.ERROR_MESSAGE);
                     }
                 }
             });
 
-            loadGameItem.addActionListener((e) -> {
+            loadGameItem.addActionListener((e) -> { // загрузка поля из файла
                 String[] newField;
-                JFileChooser chooser = new JFileChooser();
+                JFileChooser chooser = new JFileChooser(); // применение диалога выбора фйалов
                 chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-                chooser.setFileFilter(new FileNameExtensionFilter("game files", "txt"));
+                chooser.setFileFilter(new FileNameExtensionFilter("game files", "txt")); // фильтр на текстовики
                 if (chooser.showOpenDialog(mainFrame) == JFileChooser.APPROVE_OPTION){
                     try {
-                        gameLogic.setField(FileUtil.getFieldFromFile(chooser.getSelectedFile()));
-                        gamePanel.rePaintButtons();
-                        gameLogic.setZeroIndexByField();
+                        gameLogic.setField(FileUtil.getFieldFromFile(chooser.getSelectedFile())); // установка нового поля
+                        gamePanel.rePaintButtons(); // перерисовка кнопок
+                        gameLogic.setZeroIndexByField(); // обноление индекса пустоты
                     } catch (FileNotFoundException ex) {
                         JOptionPane.showMessageDialog(mainFrame, "Файл пропал!", "Ошибка файла", JOptionPane.ERROR_MESSAGE);
                     }
