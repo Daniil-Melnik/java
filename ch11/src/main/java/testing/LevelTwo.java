@@ -18,6 +18,7 @@ import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public class LevelTwo {
     private static MainFrame mainFrame; // главное окно
@@ -60,6 +61,11 @@ public class LevelTwo {
             setSize(FRAME_W, FRAME_H);
             setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
             setResizable(false);
+            setTitle("Калькулятор");
+            setIconImage(
+                    new ImageIcon(
+                    Objects.requireNonNull(this.getClass().getResource("/calculator.png"))
+                    ).getImage());
 
             btnPanel = new BtnPanel(); // введение панели с кнопками
             add(btnPanel, BorderLayout.SOUTH); // внизу

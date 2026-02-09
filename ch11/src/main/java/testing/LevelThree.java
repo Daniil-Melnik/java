@@ -52,6 +52,7 @@ public class LevelThree {
             setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
             setSize(FRAME_W, FRAME_H);
             setTitle("Пятнашки");
+            setResizable(false);
             setIconImage(
                     new ImageIcon(
                     Objects.requireNonNull(this.getClass().getResource("/rubik.png"))
@@ -173,9 +174,7 @@ public class LevelThree {
 
         public void move(GameButton btn){
             int btnPos = btn.getIndex();
-            System.out.println(btn.getIndex());
             if (enabledPositions.get(zeroIndex).contains(btnPos + "")){
-                System.out.println(zeroIndex + " " + btnPos);
                 btn.setPosition(zeroIndex / 3, zeroIndex % 3);
                 field[zeroIndex] = btn.getVal();
                 field[btnPos] = "*";
@@ -206,12 +205,18 @@ public class LevelThree {
             zeroIndex = 0;
             while (!field[zeroIndex].equals("*")) zeroIndex++;
         }
+
+        public static boolean isCorrectField(String[] testField){
+            String[] correctSortedField = {"*", "1", "2", "3", "4", "5", "6", "7", "8"};
+            Arrays.sort(testField);
+            return Arrays.equals(testField, correctSortedField);
+        }
     }
 
     private static class FileUtil{
 
         public static String[] getFieldFromFile(File file) throws FileNotFoundException {
-
+            boolean result;
             BufferedReader reader = new BufferedReader(new FileReader(file));
             String [] newField = new String[9];
 
@@ -222,8 +227,10 @@ public class LevelThree {
             } catch (IOException e){
                 JOptionPane.showMessageDialog(mainFrame, "Некорректный файл", "Ошибка файла", JOptionPane.ERROR_MESSAGE);
             }
-            System.out.println(Arrays.toString(newField));
-            return newField;
+            System.out.println(GameLogic.isCorrectField(newField));
+            result = GameLogic.isCorrectField(Arrays.copyOf(newField, newField.length));
+            if (!result) JOptionPane.showMessageDialog(mainFrame, "Некорректный файл", "ошибка файла", JOptionPane.INFORMATION_MESSAGE);
+            return result ? newField : gameLogic.getField();
         }
 
         public static void saveFieldToFile(File file) throws IOException {
@@ -276,6 +283,7 @@ public class LevelThree {
             });
 
             loadGameItem.addActionListener((e) -> {
+                String[] newField;
                 JFileChooser chooser = new JFileChooser();
                 chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
                 chooser.setFileFilter(new FileNameExtensionFilter("game files", "txt"));
