@@ -11,11 +11,16 @@
 - все панели изменений провести через строку меню
 */
 
+// переделать главную модель под расширенный компоновщик
+
 package testing;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.LinkedList;
 import java.util.Objects;
 
 public class LevelFour {
@@ -73,7 +78,14 @@ public class LevelFour {
 
     private static class TextComponent extends JComponent{
         private String text = "Hello, it's text component";
-        private Font font = new Font("Arial", Font.PLAIN, 16);
+        private String fontName = "Arial";
+        private int fontSize = 16;
+        private int fontOutline = Font.PLAIN;
+        private Font font;
+
+        public TextComponent(){
+            font = new Font(fontName, fontOutline, fontSize);
+        }
 
         @Override
         protected void paintComponent(Graphics g) {
@@ -86,9 +98,20 @@ public class LevelFour {
             g.drawString(text, (TEXT_PANEL_W - strWidth) / 2,(TEXT_PANEL_H - strHeight) / 2);
         }
 
-        @Override
-        public void setFont(Font f) {
-            font = f;
+        public void setFont() {
+            font = new Font(fontName, fontOutline, fontSize);
+        }
+
+        public void setFontName(String fN) {
+            fontName = fN;
+        }
+
+        public void setFontOutline(int fO) {
+            fontOutline = (fO >= 0 && fO <=2) ? fO : Font.PLAIN; // проверка на принадлежность [PLAIN; ITALIC]
+        }
+
+        public void setFontSize(int fS) {
+            fontSize = fS;
         }
 
         public void setText(String t) {
@@ -103,7 +126,11 @@ public class LevelFour {
 
     /*
     - Файл
-    - Содержание (кастомное диалоговое окно)
+    - режим (взаимоисключающие)
+      -- меню
+      -- панель
+
+    // случай режима-меню
     - Шрифт
       -- гарнитура
       -- начертание
@@ -114,19 +141,108 @@ public class LevelFour {
     размер - элемент на панели
 
     панель с информацией от текущих настройках + размеры строки в пикселях
+    панель с настройками
+    - Содержание (- всегда через панель)
     */
 
     private static class MainMenuBar extends JMenuBar{
         public MainMenuBar(){
             JMenu fileMenu = new JMenu("Файл");
-            JMenu textMenu = new JMenu("Содержание");
+            JMenu textMenu = new JMenu("Режим");
             JMenu fontMenu = new JMenu("Шрифт");
             JMenu colorMenu = new JMenu("Цвет");
+
+            JMenuItem shriftItem = new JMenuItem("Гарнитура");
+            shriftItem.addActionListener((e) -> {
+                try {
+                    TextAdder tA = new TextAdder(mainFrame);
+                    if (tA.showDialog()){
+                        textComponent.setFontName(tA.getText());
+                        textComponent.setFont();
+                        textComponent.repaint();
+                    }
+                } catch (IOException ex) {System.out.println("Problems with fonts.txt");}
+
+            });
+
+            fontMenu.add(shriftItem);
 
             add(fileMenu);
             add(textMenu);
             add(fontMenu);
             add(colorMenu);
+        }
+    }
+
+    private static class TextAdder extends JPanel{
+        private boolean ok = false;
+        private JFrame owner = null;
+        private JDialog dialog = null;
+        private JComboBox<String> fontCombo = null;
+
+        public TextAdder(JFrame o) throws IOException {
+            owner = o;
+
+            fontCombo = new JComboBox<>(getFontsFromFile().toArray(new String[0]));
+
+            Font font20 = new Font("Arial", Font.BOLD, 20);
+            Font font12 = new Font("Arial", Font.BOLD, 12);
+            JPanel btnPanel = new JPanel();
+            JButton okBtn = new JButton("ок");
+            JButton cancelBtn = new JButton("отмена");
+            setLayout(new BorderLayout());
+            btnPanel.setLayout(new FlowLayout());
+
+            okBtn.setFont(font12);
+            cancelBtn.setFont(font12);
+            fontCombo.setFont(font20);
+
+            okBtn.addActionListener((e) -> {
+                ok = true;
+                dialog.setVisible(false);
+            });
+
+            cancelBtn.addActionListener((e) -> dialog.setVisible(false));
+
+            btnPanel.add(okBtn);
+            btnPanel.add(cancelBtn);
+
+            add(btnPanel, BorderLayout.SOUTH);
+            add(fontCombo, BorderLayout.CENTER);
+        }
+
+        private LinkedList<String> getFontsFromFile() throws IOException {
+            String line = null;
+            LinkedList<String> items = new LinkedList<>();
+            BufferedReader reader = new BufferedReader(new FileReader(this.getClass().getResource("/fonts.txt").getFile()));
+            System.out.println(this.getClass().getResource("/fonts.txt").toString());
+
+            while ((line = reader.readLine()) != null){
+                items.add(line);
+            }
+
+            return items;
+        }
+
+        public boolean showDialog(){
+            if (dialog == null){
+                dialog = new JDialog(owner, true); // JDialog - база всех диалоговых окно, подобна JFrame
+                dialog.add(this); // добавление в базу диалогового окна наполнения из панели
+                dialog.setSize(new Dimension(380, 110));
+                dialog.setTitle("Выбор шрифта");
+                dialog.setIconImage(
+                        new ImageIcon(
+                                Objects.requireNonNull(
+                                        this.getClass().getResource("/fonts.png"))
+                        ).getImage());
+                dialog.setResizable(false);
+            }
+            dialog.setVisible(true);
+            return ok;
+        }
+
+        public String getText(){
+            return Objects.requireNonNull(fontCombo.getSelectedItem()).toString();
         }
     }
 }
