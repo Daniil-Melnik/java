@@ -11,15 +11,19 @@
 - все панели изменений провести через строку меню
 */
 
-// переделать главную модель под расширенный компоновщик
+// 1 переделать главную модель под расширенный компоновщик
+// 0 пересмотреть компоновку диалогового окна TextColorChooser чтобы всё было ровно
 
 package testing;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Objects;
 
@@ -33,6 +37,9 @@ public class LevelFour {
 
     private static final int TEXT_PANEL_W = 800;
     private static final int TEXT_PANEL_H = 350;
+
+    private static final Font font20 = new Font("Arial", Font.BOLD, 20);
+    private static final Font font12 = new Font("Arial", Font.BOLD, 12);
 
     public static void main(String... args){
         EventQueue.invokeLater(() -> {
@@ -82,6 +89,7 @@ public class LevelFour {
         private int fontSize = 16;
         private int fontOutline = Font.PLAIN;
         private Font font;
+        private Color color = Color.BLACK;
 
         public TextComponent(){
             font = new Font(fontName, fontOutline, fontSize);
@@ -90,6 +98,7 @@ public class LevelFour {
         @Override
         protected void paintComponent(Graphics g) {
             g.setFont(font);
+            g.setColor(color);
 
             FontMetrics fm = getFontMetrics(font);
             int strWidth = fm.stringWidth(text);
@@ -122,6 +131,10 @@ public class LevelFour {
             setText(t);
             setFont(f);
         }
+
+        public void setColor(Color c) {
+            color = c;
+        }
     }
 
     /*
@@ -131,9 +144,9 @@ public class LevelFour {
       -- панель
 
     // случай режима-меню
-    - Шрифт
-      -- гарнитура
-      -- начертание
+    + Шрифт
+      ++ гарнитура
+      ++ начертание
     - цвет
       -- наборный
       -- константный
@@ -152,7 +165,25 @@ public class LevelFour {
             JMenu fontMenu = new JMenu("Шрифт");
             JMenu colorMenu = new JMenu("Цвет");
 
+            JMenu outlineMenu = new JMenu("Начертание");
+
             JMenuItem shriftItem = new JMenuItem("Гарнитура");
+            ButtonGroup radioGroup = new ButtonGroup();
+            JRadioButtonMenuItem outlineItemPlain = new JRadioButtonMenuItem(new OutlineAction("Plain"));
+            JRadioButtonMenuItem outlineItemBold = new JRadioButtonMenuItem(new OutlineAction("Bold"));
+            JRadioButtonMenuItem outlineItemItalic = new JRadioButtonMenuItem(new OutlineAction("Italic"));
+            radioGroup.add(outlineItemPlain);
+            radioGroup.add(outlineItemBold);
+            radioGroup.add(outlineItemItalic);
+
+            outlineMenu.add(outlineItemPlain);
+            outlineMenu.add(outlineItemBold);
+            outlineMenu.add(outlineItemItalic);
+
+            outlineItemPlain.addActionListener((e) -> {
+                textComponent.setFontOutline(Font.PLAIN);
+            });
+
             shriftItem.addActionListener((e) -> {
                 try {
                     TextAdder tA = new TextAdder(mainFrame);
@@ -165,12 +196,44 @@ public class LevelFour {
 
             });
 
+            JMenuItem colorAddsItem = new JMenuItem("Наборный");
+            colorAddsItem.addActionListener((e) -> {
+                TextColorChooser tC = new TextColorChooser(mainFrame);
+                if (tC.showDialog()){
+                    textComponent.setColor(tC.getColor());
+                    textComponent.repaint();
+                }
+            });
+
+            colorMenu.add(colorAddsItem);
+
             fontMenu.add(shriftItem);
+            fontMenu.add(outlineMenu);
 
             add(fileMenu);
             add(textMenu);
             add(fontMenu);
             add(colorMenu);
+        }
+    }
+
+    private static class OutlineAction extends AbstractAction{
+        HashMap<String, Integer> outlineMap = new HashMap<>(3);
+
+        public OutlineAction(String name){
+            putValue(Action.NAME, name);
+            outlineMap.put("Plain", Font.PLAIN);
+            outlineMap.put("Bold", Font.BOLD);
+            outlineMap.put("Italic", Font.ITALIC);
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            String name = this.getValue(Action.NAME).toString();
+            int outline = outlineMap.get(name);
+            textComponent.setFontOutline(outline);
+            textComponent.setFont();
+            textComponent.repaint();
         }
     }
 
@@ -185,24 +248,14 @@ public class LevelFour {
 
             fontCombo = new JComboBox<>(getFontsFromFile().toArray(new String[0]));
 
-            Font font20 = new Font("Arial", Font.BOLD, 20);
-            Font font12 = new Font("Arial", Font.BOLD, 12);
+
             JPanel btnPanel = new JPanel();
-            JButton okBtn = new JButton("ок");
-            JButton cancelBtn = new JButton("отмена");
+            CustomBtn okBtn = new CustomBtn("ок", font12, (e) -> {ok = true; dialog.setVisible(false);});
+            CustomBtn cancelBtn = new CustomBtn("отмена", font12, (e) -> {dialog.setVisible(false);});
             setLayout(new BorderLayout());
             btnPanel.setLayout(new FlowLayout());
 
-            okBtn.setFont(font12);
-            cancelBtn.setFont(font12);
             fontCombo.setFont(font20);
-
-            okBtn.addActionListener((e) -> {
-                ok = true;
-                dialog.setVisible(false);
-            });
-
-            cancelBtn.addActionListener((e) -> dialog.setVisible(false));
 
             btnPanel.add(okBtn);
             btnPanel.add(cancelBtn);
@@ -243,6 +296,91 @@ public class LevelFour {
 
         public String getText(){
             return Objects.requireNonNull(fontCombo.getSelectedItem()).toString();
+        }
+    }
+
+    private static class TextColorChooser extends JPanel{
+        private JSlider rSlider = new JSlider(0, 255, 100);
+        private JSlider gSlider = new JSlider(0, 255, 100);
+        private JSlider bSlider = new JSlider(0, 255, 100);
+
+        private JDialog dialog = null;
+        private JFrame owner = null;
+        private boolean ok = false;
+
+        private HashMap<String, JSlider> sliders = new HashMap<>(3);
+        private HashMap<String, JLabel> valLabels = new HashMap<>(3);
+        private HashMap<String, JLabel> colorNameLabels = new HashMap<>(3);
+
+        {
+            valLabels.put("r", new JLabel("100"));
+            valLabels.put("g", new JLabel("100"));
+            valLabels.put("b", new JLabel("100"));
+
+            colorNameLabels.put("r", new JLabel("Красный"));
+            colorNameLabels.put("g", new JLabel("Зелёный"));
+            colorNameLabels.put("b", new JLabel("Синий"));
+
+            sliders.put("r", new JSlider(0, 255, 100));
+            sliders.put("g", new JSlider(0, 255, 100));
+            sliders.put("b", new JSlider(0, 255, 100));
+        }
+
+        public TextColorChooser(JFrame o){
+            setLayout(new BorderLayout());
+
+            owner = o;
+            CustomBtn okBtn = new CustomBtn("ок", font12, (e) -> {ok = true; dialog.setVisible(false);});
+            CustomBtn cancelBtn = new CustomBtn("отмена", font12, (e) -> {dialog.setVisible(false);});
+
+            JPanel sliderPanel = new JPanel();
+            sliderPanel.setLayout(new GridLayout(3, 3));
+
+            for (String s : valLabels.keySet()){
+                JPanel sPanel = new JPanel();
+                sPanel.setLayout(new BorderLayout());
+
+                colorNameLabels.get(s).setFont(font12);
+                valLabels.get(s).setFont(font12);
+
+                sPanel.add(colorNameLabels.get(s), BorderLayout.WEST);
+                sPanel.add(sliders.get(s), BorderLayout.CENTER);
+                sPanel.add(valLabels.get(s), BorderLayout.EAST);
+
+                sliderPanel.add(sPanel);
+            }
+
+            JPanel btnPanel = new JPanel();
+            btnPanel.add(okBtn);
+            btnPanel.add(cancelBtn);
+
+            add(sliderPanel, BorderLayout.CENTER);
+            add(btnPanel, BorderLayout.SOUTH);
+        }
+
+        public boolean showDialog(){
+            if (dialog == null){
+                dialog = new JDialog(owner, true);
+                dialog.add(this);
+                dialog.pack();
+                dialog.setResizable(false);
+                dialog.setTitle("Выбор цвета");
+                dialog.setSize(400, 200);
+            }
+            dialog.setVisible(true);
+            return ok;
+        }
+
+        public Color getColor(){
+            return new Color(rSlider.getValue(), gSlider.getValue(), bSlider.getValue());
+        }
+    }
+
+    private static class CustomBtn extends JButton{
+        public CustomBtn(String name, Font font, ActionListener listener){
+            setText(name);
+            addActionListener(listener);
+            setFont(font);
         }
     }
 }
