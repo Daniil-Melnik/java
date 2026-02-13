@@ -24,6 +24,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Objects;
 
@@ -86,8 +87,8 @@ public class LevelFour {
     private static class TextComponent extends JComponent{
         private String text = "Hello, it's text component";
         private String fontName = "Arial";
-        private int fontSize = 16;
-        private int fontOutline = Font.PLAIN;
+        private int fontSize = 26;
+        private int fontOutline = Font.BOLD;
         private Font font;
         private Color color = Color.BLACK;
 
@@ -200,6 +201,7 @@ public class LevelFour {
             colorAddsItem.addActionListener((e) -> {
                 TextColorChooser tC = new TextColorChooser(mainFrame);
                 if (tC.showDialog()){
+                    System.out.println("Text changed");
                     textComponent.setColor(tC.getColor());
                     textComponent.repaint();
                 }
@@ -309,7 +311,7 @@ public class LevelFour {
         private boolean ok = false;
 
         private HashMap<String, JSlider> sliders = new HashMap<>(3);
-        private HashMap<String, JLabel> valLabels = new HashMap<>(3);
+        private LinkedHashMap<String, JLabel> valLabels = new LinkedHashMap<>(3);
         private HashMap<String, JLabel> colorNameLabels = new HashMap<>(3);
 
         {
@@ -327,35 +329,51 @@ public class LevelFour {
         }
 
         public TextColorChooser(JFrame o){
-            setLayout(new BorderLayout());
+            setLayout(new GridBagLayout());
+            JPanel colorProbe = new JPanel();
+            colorProbe.setBackground(this.getColor());
 
             owner = o;
             CustomBtn okBtn = new CustomBtn("ок", font12, (e) -> {ok = true; dialog.setVisible(false);});
             CustomBtn cancelBtn = new CustomBtn("отмена", font12, (e) -> {dialog.setVisible(false);});
 
             JPanel sliderPanel = new JPanel();
-            sliderPanel.setLayout(new GridLayout(3, 3));
+            sliderPanel.setLayout(new GridBagLayout());
 
+            int i = 0;
+
+            System.out.println(valLabels.keySet());
             for (String s : valLabels.keySet()){
-                JPanel sPanel = new JPanel();
-                sPanel.setLayout(new BorderLayout());
-
                 colorNameLabels.get(s).setFont(font12);
                 valLabels.get(s).setFont(font12);
+                sliders.get(s).addChangeListener((e) -> {
+                    valLabels.get(s).setText(sliders.get(s).getValue() + "");
+                    colorProbe.setBackground(this.getColor());
+                });
 
-                sPanel.add(colorNameLabels.get(s), BorderLayout.WEST);
-                sPanel.add(sliders.get(s), BorderLayout.CENTER);
-                sPanel.add(valLabels.get(s), BorderLayout.EAST);
+                sliderPanel.add(colorNameLabels.get(s), new GBC(0, i, 1, 1)
+                        .setWeight(0.2, 0.3)
+                        .setAnchor(GBC.EAST)
+                        .setInsets(0,0,0,20));
+                sliderPanel.add(sliders.get(s), new GBC(1, i, 7, 1)
+                        .setWeight(0.6,0.3)
+                        .setFill(GBC.HORIZONTAL));
+                sliderPanel.add(valLabels.get(s), new GBC(8, i, 2, 1)
+                        .setWeight(0.2, 0.3));
 
-                sliderPanel.add(sPanel);
+                i++;
             }
 
             JPanel btnPanel = new JPanel();
             btnPanel.add(okBtn);
             btnPanel.add(cancelBtn);
 
-            add(sliderPanel, BorderLayout.CENTER);
-            add(btnPanel, BorderLayout.SOUTH);
+            add(sliderPanel, new GBC(0, 0, 10, 3)
+                    .setWeight(1, 0.8).setFill(GridBagConstraints.BOTH));
+            add(colorProbe, new GBC(0, 3, 10, 1)
+                    .setWeight(1, 0.1).setFill(GBC.BOTH));
+            add(btnPanel, new GBC(0, 4, 10, 1)
+                    .setWeight(1, 0.1));
         }
 
         public boolean showDialog(){
@@ -366,13 +384,22 @@ public class LevelFour {
                 dialog.setResizable(false);
                 dialog.setTitle("Выбор цвета");
                 dialog.setSize(400, 200);
+                dialog.setIconImage(new ImageIcon(
+                        Objects.requireNonNull(
+                                this.getClass().getResource("/palette.png")
+                        )
+                ).getImage());
             }
             dialog.setVisible(true);
             return ok;
         }
 
         public Color getColor(){
-            return new Color(rSlider.getValue(), gSlider.getValue(), bSlider.getValue());
+            return new Color(
+                    sliders.get("r").getValue(),
+                    sliders.get("g").getValue(),
+                    sliders.get("b").getValue()
+            );
         }
     }
 
@@ -381,6 +408,46 @@ public class LevelFour {
             setText(name);
             addActionListener(listener);
             setFont(font);
+        }
+    }
+
+    private static class GBC extends GridBagConstraints{
+        public GBC(int gx, int gy){
+            this.gridx = gx;
+            this.gridy = gy;
+        }
+
+        public GBC(int gx, int gy, int w, int h){
+            this.gridx = gx;
+            this.gridy = gy;
+            this.gridwidth = w;
+            this.gridheight = h;
+        }
+
+        public GBC setAnchor(int a){
+            this.anchor = a;
+            return this;
+        }
+
+        public GBC setFill(int f){
+            this.fill = f;
+            return this;
+        }
+
+        public GBC setWeight(double wx, double wy){
+            this.weightx = wx;
+            this.weighty = wy;
+            return this;
+        }
+
+        public GBC setInsets(int dist){
+            this.insets = new Insets(dist, dist, dist, dist);
+            return this;
+        }
+
+        public GBC setInsets(int t, int b, int l, int r){
+            this.insets = new Insets(t, l, b, r);
+            return this;
         }
     }
 }
