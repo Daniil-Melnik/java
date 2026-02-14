@@ -59,6 +59,7 @@ public class LevelThree {
 
             setJMenuBar(new MainMenuBar()); // добавление строки меню
         }
+
     }
 
     private static class GamePanel extends JPanel{ // класс описания интерфейса - игровой панели с кнопками
