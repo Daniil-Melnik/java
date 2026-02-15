@@ -20,10 +20,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 
 public class LevelFour {
@@ -158,6 +155,9 @@ public class LevelFour {
     */
 
     private static class MainMenuBar extends JMenuBar{
+        private static boolean PALETTE = false;
+        private static boolean ADDITIVE = true;
+
         public MainMenuBar(){
             JMenu fileMenu = new JMenu("Файл");
             JMenu textMenu = new JMenu("Режим");
@@ -171,6 +171,9 @@ public class LevelFour {
             JRadioButtonMenuItem outlineItemPlain = new JRadioButtonMenuItem(new OutlineAction("Plain"));
             JRadioButtonMenuItem outlineItemBold = new JRadioButtonMenuItem(new OutlineAction("Bold"));
             JRadioButtonMenuItem outlineItemItalic = new JRadioButtonMenuItem(new OutlineAction("Italic"));
+
+            outlineItemBold.setSelected(true);
+
             radioGroup.add(outlineItemPlain);
             radioGroup.add(outlineItemBold);
             radioGroup.add(outlineItemItalic);
@@ -191,13 +194,15 @@ public class LevelFour {
                         textComponent.setFont();
                         textComponent.repaint();
                     }
-                } catch (IOException ex) {System.out.println("Problems with fonts.txt");}
+                } catch (IOException ex) {System.out.println(ex.getMessage());}
 
             });
 
             JMenuItem colorAddsItem = new JMenuItem("Наборный");
+            JMenuItem colorPaletteItem = new JMenuItem("Плитка");
+
             colorAddsItem.addActionListener((e) -> {
-                TextColorChooser tC = new TextColorChooser(mainFrame);
+                TextColorChooser tC = new TextColorChooser(mainFrame, ADDITIVE);
                 if (tC.showDialog()){
                     System.out.println("Text changed");
                     textComponent.setColor(tC.getColor());
@@ -205,7 +210,16 @@ public class LevelFour {
                 }
             });
 
+            colorPaletteItem.addActionListener((e) -> {
+                TextColorChooser tC = new TextColorChooser(mainFrame, PALETTE);
+                if (tC.showDialog()){
+                    textComponent.setColor(tC.getColor());
+                    textComponent.repaint();
+                }
+            });
+
             colorMenu.add(colorAddsItem);
+            colorMenu.add(colorPaletteItem);
 
             fontMenu.add(shriftItem);
             fontMenu.add(outlineMenu);
@@ -267,11 +281,12 @@ public class LevelFour {
         private LinkedList<String> getFontsFromFile() throws IOException {
             String line = null;
             LinkedList<String> items = new LinkedList<>();
-            BufferedReader reader = new BufferedReader(new FileReader(this.getClass().getResource("/fonts.txt").getFile()));
-            System.out.println(this.getClass().getResource("/fonts.txt").toString());
+            try (InputStream inputStream = getClass().getResourceAsStream("/fonts.txt");
+                 BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            while ((line = reader.readLine()) != null){
-                items.add(line);
+                while ((line = reader.readLine()) != null) {
+                    items.add(line);
+                }
             }
 
             return items;
@@ -303,6 +318,8 @@ public class LevelFour {
         private JDialog dialog = null;
         private JFrame owner = null;
         private boolean ok = false;
+        private Color color = null;
+        private boolean type = false;
 
         private HashMap<String, JSlider> sliders = new HashMap<>(3);
         private LinkedHashMap<String, JLabel> valLabels = new LinkedHashMap<>(3);
@@ -355,10 +372,12 @@ public class LevelFour {
             sliders.put("b", new JSlider(0, 255, 100));
         }
 
-        public TextColorChooser(JFrame o){
+        public TextColorChooser(JFrame o, boolean t){
+            type = t;
+
             setLayout(new GridBagLayout());
             JPanel colorProbe = new JPanel();
-            colorProbe.setBackground(this.getColor());
+            colorProbe.setBackground(type ? new Color(100, 100, 100) : Color.BLACK);
 
             owner = o;
 
@@ -374,6 +393,10 @@ public class LevelFour {
                 sliders.get(s).addChangeListener((e) -> {
                     valLabels.get(s).setText(sliders.get(s).getValue() + "");
                     colorProbe.setBackground(this.getColor());
+                    color = new Color(
+                            sliders.get("r").getValue(),
+                            sliders.get("g").getValue(),
+                            sliders.get("b").getValue());
                 });
 
                 sliderPanel.add(colorNameLabels.get(s), new GBC(0, i, 1, 1)
@@ -391,10 +414,21 @@ public class LevelFour {
 
             JPanel colorPalettePanel = new JPanel();
             colorPalettePanel.setLayout(new GridLayout(3, 10));
+            for (int[] c : colors){
+                Color cl = new Color(c[0], c[1], c[2]);
+                JButton cBtn = new JButton();
+                cBtn.setBackground(cl);
+                cBtn.setToolTipText(Arrays.toString(c));
+                cBtn.addActionListener((e) -> {
+                    colorProbe.setBackground(cl);
+                    color = cl;
+                });
+                colorPalettePanel.add(cBtn);
+            }
 
 
 
-            add(sliderPanel, new GBC(0, 0, 10, 3)
+            add(type ? sliderPanel : colorPalettePanel, new GBC(0, 0, 10, 3)
                     .setWeight(1, 0.8).setFill(GridBagConstraints.BOTH));
             add(colorProbe, new GBC(0, 3, 10, 1)
                     .setWeight(1, 0.1).setFill(GBC.BOTH));
@@ -415,7 +449,7 @@ public class LevelFour {
                 dialog.add(btnPanel, BorderLayout.SOUTH);
                 dialog.pack();
                 dialog.setResizable(false);
-                dialog.setTitle("Выбор цвета");
+                dialog.setTitle("Выбор цвета: " + (type ? "наборный" : "плитка"));
                 dialog.setSize(400, 200);
                 dialog.setIconImage(new ImageIcon(
                         Objects.requireNonNull(
@@ -428,11 +462,7 @@ public class LevelFour {
         }
 
         public Color getColor(){
-            return new Color(
-                    sliders.get("r").getValue(),
-                    sliders.get("g").getValue(),
-                    sliders.get("b").getValue()
-            );
+            return color;
         }
     }
 
