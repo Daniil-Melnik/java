@@ -11,8 +11,7 @@
 - все панели изменений провести через строку меню
 */
 
-// 1 переделать главную модель под расширенный компоновщик
-// 0 пересмотреть компоновку диалогового окна TextColorChooser чтобы всё было ровно
+// 0 разделить проект на несколько файлов (возможны классы-фабрики)
 
 package testing;
 
@@ -155,8 +154,8 @@ public class LevelFour {
     */
 
     private static class MainMenuBar extends JMenuBar{
-        private static boolean PALETTE = false;
-        private static boolean ADDITIVE = true;
+        private static final boolean PALETTE = false;
+        private static final boolean ADDITIVE = true;
 
         public MainMenuBar(){
             JMenu fileMenu = new JMenu("Файл");
@@ -318,11 +317,11 @@ public class LevelFour {
         private Color color = null;
         private boolean type = false;
 
-        private HashMap<String, JSlider> sliders = new HashMap<>(3);
-        private LinkedHashMap<String, JLabel> valLabels = new LinkedHashMap<>(3);
-        private HashMap<String, JLabel> colorNameLabels = new HashMap<>(3);
+        private final HashMap<String, JSlider> sliders = new HashMap<>(3);
+        private final LinkedHashMap<String, JLabel> valLabels = new LinkedHashMap<>(3);
+        private final HashMap<String, JLabel> colorNameLabels = new HashMap<>(3);
 
-        private int[][] colors = {
+        private static final int[][] colors = {
                 {51,0,0},
                 {51, 25, 0},
                 {51, 51, 0},
