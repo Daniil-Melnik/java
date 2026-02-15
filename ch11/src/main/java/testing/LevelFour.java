@@ -171,9 +171,6 @@ public class LevelFour {
             JRadioButtonMenuItem outlineItemPlain = new JRadioButtonMenuItem(new OutlineAction("Plain"));
             JRadioButtonMenuItem outlineItemBold = new JRadioButtonMenuItem(new OutlineAction("Bold"));
             JRadioButtonMenuItem outlineItemItalic = new JRadioButtonMenuItem(new OutlineAction("Italic"));
-
-            outlineItemBold.setSelected(true);
-
             radioGroup.add(outlineItemPlain);
             radioGroup.add(outlineItemBold);
             radioGroup.add(outlineItemItalic);
