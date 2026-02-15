@@ -21,12 +21,10 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.Objects;
+import java.util.*;
 
 public class LevelFour {
     private static MainFrame mainFrame;
@@ -302,10 +300,6 @@ public class LevelFour {
     }
 
     private static class TextColorChooser extends JPanel{
-        private JSlider rSlider = new JSlider(0, 255, 100);
-        private JSlider gSlider = new JSlider(0, 255, 100);
-        private JSlider bSlider = new JSlider(0, 255, 100);
-
         private JDialog dialog = null;
         private JFrame owner = null;
         private boolean ok = false;
@@ -313,6 +307,39 @@ public class LevelFour {
         private HashMap<String, JSlider> sliders = new HashMap<>(3);
         private LinkedHashMap<String, JLabel> valLabels = new LinkedHashMap<>(3);
         private HashMap<String, JLabel> colorNameLabels = new HashMap<>(3);
+
+        private int[][] colors = {
+                {51,0,0},
+                {51, 25, 0},
+                {51, 51, 0},
+                {0, 51, 0},
+                {0, 51, 25},
+                {0, 51, 51},
+                {0, 0, 51},
+                {25, 0, 51},
+                {51, 0, 51},
+                {0, 0, 0},
+                {153, 0, 0},
+                {153, 76, 0},
+                {153, 153, 0},
+                {0, 153, 0},
+                {0, 153, 76},
+                {0, 153, 153},
+                {0, 0, 153},
+                {76, 0, 153},
+                {153, 0, 153},
+                {64, 64, 64},
+                {255, 0, 0},
+                {255, 128, 0},
+                {255, 255, 0},
+                {0, 255, 0},
+                {0, 255, 128},
+                {0, 255, 255},
+                {0, 0, 255},
+                {127, 0, 255},
+                {255, 0, 255},
+                {128, 128, 128}
+        };
 
         {
             valLabels.put("r", new JLabel("100"));
@@ -334,8 +361,6 @@ public class LevelFour {
             colorProbe.setBackground(this.getColor());
 
             owner = o;
-            CustomBtn okBtn = new CustomBtn("ок", font12, (e) -> {ok = true; dialog.setVisible(false);});
-            CustomBtn cancelBtn = new CustomBtn("отмена", font12, (e) -> {dialog.setVisible(false);});
 
             JPanel sliderPanel = new JPanel();
             sliderPanel.setLayout(new GridBagLayout());
@@ -364,22 +389,30 @@ public class LevelFour {
                 i++;
             }
 
-            JPanel btnPanel = new JPanel();
-            btnPanel.add(okBtn);
-            btnPanel.add(cancelBtn);
+            JPanel colorPalettePanel = new JPanel();
+            colorPalettePanel.setLayout(new GridLayout(3, 10));
+
+
 
             add(sliderPanel, new GBC(0, 0, 10, 3)
                     .setWeight(1, 0.8).setFill(GridBagConstraints.BOTH));
             add(colorProbe, new GBC(0, 3, 10, 1)
                     .setWeight(1, 0.1).setFill(GBC.BOTH));
-            add(btnPanel, new GBC(0, 4, 10, 1)
-                    .setWeight(1, 0.1));
         }
 
         public boolean showDialog(){
             if (dialog == null){
                 dialog = new JDialog(owner, true);
-                dialog.add(this);
+                dialog.setLayout(new BorderLayout());
+                dialog.add(this, BorderLayout.CENTER);
+
+                CustomBtn okBtn = new CustomBtn("ок", font12, (e) -> {ok = true; dialog.setVisible(false);});
+                CustomBtn cancelBtn = new CustomBtn("отмена", font12, (e) -> {dialog.setVisible(false);});
+
+                JPanel btnPanel = new JPanel();
+                btnPanel.add(okBtn);
+                btnPanel.add(cancelBtn);
+                dialog.add(btnPanel, BorderLayout.SOUTH);
                 dialog.pack();
                 dialog.setResizable(false);
                 dialog.setTitle("Выбор цвета");
