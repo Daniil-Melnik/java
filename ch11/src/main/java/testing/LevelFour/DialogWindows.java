@@ -159,7 +159,7 @@ public class DialogWindows {
 
             setLayout(new GridBagLayout());
             JPanel colorProbe = new JPanel();
-            colorProbe.setBackground(type ? currColor : Color.BLACK);
+            colorProbe.setBackground(currColor);
 
             owner = o;
 

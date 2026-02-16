@@ -189,7 +189,11 @@ public class LevelFour {
                 }
             });
 
-            add(inputTextField, new GBC(0, 0, 16, 1).setWeight(1, 0.1).setFill(1).setInsets(10));
+            JLabel textLabel = new JLabel("Строка:");
+            textLabel.setFont(new Font("Arial", Font.PLAIN, 20));
+
+            add(textLabel, new GBC(0, 0, 2, 1).setWeight(0, 0.1).setAnchor(GBC.EAST).setInsets(0, 0, 10, 0));
+            add(inputTextField, new GBC(2, 0, 14, 1).setWeight(1, 0.1).setFill(1).setInsets(10));
 
             JPanel fillPanel = new JPanel();
 
