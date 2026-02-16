@@ -16,9 +16,11 @@
 package testing.LevelFour;
 
 import javax.swing.*;
+import javax.swing.border.EtchedBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.*;
 import java.util.*;
 
@@ -26,6 +28,7 @@ public class LevelFour {
     private static MainFrame mainFrame;
     private static TextPanel textPanel;
     private static TextComponent textComponent;
+    private static TextInfoPanel textInfoPanel;
 
     private static final int FRAME_W = 800;
     private static final int FRAME_H = 500;
@@ -53,8 +56,10 @@ public class LevelFour {
                     ).getImage());
 
             textPanel = new TextPanel();
+            textInfoPanel = new TextInfoPanel();
 
-            add(textPanel, BorderLayout.NORTH);
+            add(textPanel, BorderLayout.CENTER);
+            add(textInfoPanel, BorderLayout.SOUTH);
 
             setJMenuBar(new MainMenuBar());
         }
@@ -62,8 +67,8 @@ public class LevelFour {
 
     private static class TextPanel extends JPanel{
         public TextPanel(){
-            setBackground(Color.WHITE);
             setLayout(new BorderLayout());
+            setBackground(Color.WHITE);
             textComponent = new TextComponent();
 
             add(textComponent, BorderLayout.CENTER);
@@ -118,7 +123,14 @@ public class LevelFour {
         }
 
         public void setText(String t) {
-            text = t;
+            FontMetrics fm = getFontMetrics(font);
+            if (fm.stringWidth(t) <= TEXT_PANEL_W - fm.stringWidth("W") * 6){
+                text = t;
+            }
+        }
+
+        public String getText(){
+            return text;
         }
 
         public void setComponent(String t, Font f){
@@ -129,28 +141,66 @@ public class LevelFour {
         public void setColor(Color c) {
             color = c;
         }
+
+        public Color getColor(){
+            return color;
+        }
     }
 
     /*
     - Файл
-    - режим (взаимоисключающие)
-      -- меню
-      -- панель
 
-    // случай режима-меню
     + Шрифт
       ++ гарнитура
       ++ начертание
-    - цвет
-      -- наборный
-      -- константный
+      -- размер
 
-    размер - элемент на панели
+    + цвет
+      ++ наборный
+      ++ константный
 
     панель с информацией от текущих настройках + размеры строки в пикселях
-    панель с настройками
+
     - Содержание (- всегда через панель)
     */
+
+    private static class TextInfoPanel extends JPanel{
+        public TextInfoPanel(){
+            setBorder(new EtchedBorder());
+            setLayout(new GridBagLayout());
+            JTextField inputTextField = new JTextField();
+            inputTextField.setFont(new Font("Arial", Font.PLAIN, 20));
+            inputTextField.setText(textComponent.getText());
+            inputTextField.getDocument().addDocumentListener(new DocumentListener() {
+                @Override
+                public void insertUpdate(DocumentEvent e) {
+                    textComponent.setText(inputTextField.getText());
+                    textComponent.repaint();
+                }
+
+                @Override
+                public void removeUpdate(DocumentEvent e) {
+                    textComponent.setText(inputTextField.getText());
+                    textComponent.repaint();
+                }
+
+                @Override
+                public void changedUpdate(DocumentEvent e) {
+                }
+            });
+
+            add(inputTextField, new GBC(0, 0, 16, 1).setWeight(1, 0.1).setFill(1).setInsets(10));
+
+            JPanel fillPanel = new JPanel();
+
+            add(fillPanel, new GBC(0, 1, 16, 2).setWeight(1, 1).setFill(1));
+        }
+
+        @Override
+        public Dimension getPreferredSize() {
+            return new Dimension(TEXT_PANEL_W, FRAME_H - TEXT_PANEL_H);
+        }
+    }
 
     private static class MainMenuBar extends JMenuBar{
         private static final boolean PALETTE = false;
@@ -196,16 +246,15 @@ public class LevelFour {
             JMenuItem colorPaletteItem = new JMenuItem("Плитка");
 
             colorAddsItem.addActionListener((e) -> {
-                DialogWindows.TextColorChooser tC = DialogWindows.getTextColorChooser(mainFrame, ADDITIVE);
+                DialogWindows.TextColorChooser tC = DialogWindows.getTextColorChooser(mainFrame, ADDITIVE, textComponent.getColor());
                 if (tC.showDialog()){
-                    System.out.println("Text changed");
                     textComponent.setColor(tC.getColor());
                     textComponent.repaint();
                 }
             });
 
             colorPaletteItem.addActionListener((e) -> {
-                DialogWindows.TextColorChooser tC = DialogWindows.getTextColorChooser(mainFrame, PALETTE);
+                DialogWindows.TextColorChooser tC = DialogWindows.getTextColorChooser(mainFrame, PALETTE, textComponent.getColor());
                 if (tC.showDialog()){
                     textComponent.setColor(tC.getColor());
                     textComponent.repaint();

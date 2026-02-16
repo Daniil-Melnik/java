@@ -17,8 +17,8 @@ public class DialogWindows {
         return new TextAdder(f);
     }
 
-    public static TextColorChooser getTextColorChooser(JFrame f, boolean t){
-        return new TextColorChooser(f, t);
+    public static TextColorChooser getTextColorChooser(JFrame f, boolean t, Color currColor){
+        return new TextColorChooser(f, t, currColor);
     }
 
     public static class TextAdder extends JPanel {
@@ -88,7 +88,7 @@ public class DialogWindows {
         private JDialog dialog = null;
         private JFrame owner = null;
         private boolean ok = false;
-        private Color color = null;
+        private Color color = Color.BLACK;
         private boolean type = false;
 
         private final HashMap<String, JSlider> sliders = new HashMap<>(3);
@@ -142,12 +142,24 @@ public class DialogWindows {
             sliders.put("b", new JSlider(0, 255, 100));
         }
 
-        public TextColorChooser(JFrame o, boolean t){
+        public TextColorChooser(JFrame o, boolean t, Color currColor){
+
+            color = currColor;
+
+            sliders.get("r").setValue(currColor.getRed());
+            sliders.get("g").setValue(currColor.getGreen());
+            sliders.get("b").setValue(currColor.getBlue());
+
+            valLabels.get("r").setText(currColor.getRed() + "");
+            valLabels.get("g").setText(currColor.getGreen() + "");
+            valLabels.get("b").setText(currColor.getBlue() + "");
+
+
             type = t;
 
             setLayout(new GridBagLayout());
             JPanel colorProbe = new JPanel();
-            colorProbe.setBackground(type ? new Color(100, 100, 100) : Color.BLACK);
+            colorProbe.setBackground(type ? currColor : Color.BLACK);
 
             owner = o;
 
@@ -156,7 +168,6 @@ public class DialogWindows {
 
             int i = 0;
 
-            System.out.println(valLabels.keySet());
             for (String s : valLabels.keySet()){
                 colorNameLabels.get(s).setFont(font12);
                 valLabels.get(s).setFont(font12);
