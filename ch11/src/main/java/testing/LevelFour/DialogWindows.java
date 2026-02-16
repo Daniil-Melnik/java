@@ -1,0 +1,246 @@
+package testing.LevelFour;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionListener;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.*;
+
+public class DialogWindows {
+    private static final Font font20 = new Font("Arial", Font.BOLD, 20);
+    private static final Font font12 = new Font("Arial", Font.BOLD, 12);
+
+    public static TextAdder getTextAddedDialog(JFrame f) throws IOException {
+        return new TextAdder(f);
+    }
+
+    public static TextColorChooser getTextColorChooser(JFrame f, boolean t){
+        return new TextColorChooser(f, t);
+    }
+
+    public static class TextAdder extends JPanel {
+        private boolean ok = false;
+        private JFrame owner = null;
+        private JDialog dialog = null;
+        private JComboBox<String> fontCombo = null;
+
+        public TextAdder(JFrame o) throws IOException {
+            owner = o;
+
+            fontCombo = new JComboBox<>(getFontsFromFile().toArray(new String[0]));
+
+
+            JPanel btnPanel = new JPanel();
+            CustomBtn okBtn = new CustomBtn("ок", font12, (e) -> {ok = true; dialog.setVisible(false);});
+            CustomBtn cancelBtn = new CustomBtn("отмена", font12, (e) -> {dialog.setVisible(false);});
+            setLayout(new BorderLayout());
+            btnPanel.setLayout(new FlowLayout());
+
+            fontCombo.setFont(font20);
+
+            btnPanel.add(okBtn);
+            btnPanel.add(cancelBtn);
+
+            add(btnPanel, BorderLayout.SOUTH);
+            add(fontCombo, BorderLayout.CENTER);
+        }
+
+        private LinkedList<String> getFontsFromFile() throws IOException {
+            String line = null;
+            LinkedList<String> items = new LinkedList<>();
+            try (InputStream inputStream = getClass().getResourceAsStream("/fonts.txt");
+                 BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+
+                while ((line = reader.readLine()) != null) {
+                    items.add(line);
+                }
+            }
+
+            return items;
+        }
+
+        public boolean showDialog(){
+            if (dialog == null){
+                dialog = new JDialog(owner, true); // JDialog - база всех диалоговых окно, подобна JFrame
+                dialog.add(this); // добавление в базу диалогового окна наполнения из панели
+                dialog.setSize(new Dimension(380, 110));
+                dialog.setTitle("Выбор шрифта");
+                dialog.setIconImage(
+                        new ImageIcon(
+                                Objects.requireNonNull(
+                                        this.getClass().getResource("/fonts.png"))
+                        ).getImage());
+                dialog.setResizable(false);
+            }
+            dialog.setVisible(true);
+            return ok;
+        }
+
+        public String getText(){
+            return Objects.requireNonNull(fontCombo.getSelectedItem()).toString();
+        }
+    }
+
+    public static class TextColorChooser extends JPanel{
+        private JDialog dialog = null;
+        private JFrame owner = null;
+        private boolean ok = false;
+        private Color color = null;
+        private boolean type = false;
+
+        private final HashMap<String, JSlider> sliders = new HashMap<>(3);
+        private final LinkedHashMap<String, JLabel> valLabels = new LinkedHashMap<>(3);
+        private final HashMap<String, JLabel> colorNameLabels = new HashMap<>(3);
+
+        private static final int[][] colors = {
+                {51,0,0},
+                {51, 25, 0},
+                {51, 51, 0},
+                {0, 51, 0},
+                {0, 51, 25},
+                {0, 51, 51},
+                {0, 0, 51},
+                {25, 0, 51},
+                {51, 0, 51},
+                {0, 0, 0},
+                {153, 0, 0},
+                {153, 76, 0},
+                {153, 153, 0},
+                {0, 153, 0},
+                {0, 153, 76},
+                {0, 153, 153},
+                {0, 0, 153},
+                {76, 0, 153},
+                {153, 0, 153},
+                {64, 64, 64},
+                {255, 0, 0},
+                {255, 128, 0},
+                {255, 255, 0},
+                {0, 255, 0},
+                {0, 255, 128},
+                {0, 255, 255},
+                {0, 0, 255},
+                {127, 0, 255},
+                {255, 0, 255},
+                {128, 128, 128}
+        };
+
+        {
+            valLabels.put("r", new JLabel("100"));
+            valLabels.put("g", new JLabel("100"));
+            valLabels.put("b", new JLabel("100"));
+
+            colorNameLabels.put("r", new JLabel("Красный"));
+            colorNameLabels.put("g", new JLabel("Зелёный"));
+            colorNameLabels.put("b", new JLabel("Синий"));
+
+            sliders.put("r", new JSlider(0, 255, 100));
+            sliders.put("g", new JSlider(0, 255, 100));
+            sliders.put("b", new JSlider(0, 255, 100));
+        }
+
+        public TextColorChooser(JFrame o, boolean t){
+            type = t;
+
+            setLayout(new GridBagLayout());
+            JPanel colorProbe = new JPanel();
+            colorProbe.setBackground(type ? new Color(100, 100, 100) : Color.BLACK);
+
+            owner = o;
+
+            JPanel sliderPanel = new JPanel();
+            sliderPanel.setLayout(new GridBagLayout());
+
+            int i = 0;
+
+            System.out.println(valLabels.keySet());
+            for (String s : valLabels.keySet()){
+                colorNameLabels.get(s).setFont(font12);
+                valLabels.get(s).setFont(font12);
+                sliders.get(s).addChangeListener((e) -> {
+                    valLabels.get(s).setText(sliders.get(s).getValue() + "");
+                    colorProbe.setBackground(this.getColor());
+                    color = new Color(
+                            sliders.get("r").getValue(),
+                            sliders.get("g").getValue(),
+                            sliders.get("b").getValue());
+                });
+
+                sliderPanel.add(colorNameLabels.get(s), new GBC(0, i, 1, 1)
+                        .setWeight(0.2, 0.3)
+                        .setAnchor(GBC.EAST)
+                        .setInsets(0,0,0,20));
+                sliderPanel.add(sliders.get(s), new GBC(1, i, 7, 1)
+                        .setWeight(0.6,0.3)
+                        .setFill(GBC.HORIZONTAL));
+                sliderPanel.add(valLabels.get(s), new GBC(8, i, 2, 1)
+                        .setWeight(0.2, 0.3));
+
+                i++;
+            }
+
+            JPanel colorPalettePanel = new JPanel();
+            colorPalettePanel.setLayout(new GridLayout(3, 10));
+            for (int[] c : colors){
+                Color cl = new Color(c[0], c[1], c[2]);
+                JButton cBtn = new JButton();
+                cBtn.setBackground(cl);
+                cBtn.setToolTipText(Arrays.toString(c));
+                cBtn.addActionListener((e) -> {
+                    colorProbe.setBackground(cl);
+                    color = cl;
+                });
+                colorPalettePanel.add(cBtn);
+            }
+
+
+
+            add(type ? sliderPanel : colorPalettePanel, new GBC(0, 0, 10, 3)
+                    .setWeight(1, 0.8).setFill(GridBagConstraints.BOTH));
+            add(colorProbe, new GBC(0, 3, 10, 1)
+                    .setWeight(1, 0.1).setFill(GBC.BOTH));
+        }
+
+        public boolean showDialog(){
+            if (dialog == null){
+                dialog = new JDialog(owner, true);
+                dialog.setLayout(new BorderLayout());
+                dialog.add(this, BorderLayout.CENTER);
+
+                CustomBtn okBtn = new CustomBtn("ок", font12, (e) -> {ok = true; dialog.setVisible(false);});
+                CustomBtn cancelBtn = new CustomBtn("отмена", font12, (e) -> {dialog.setVisible(false);});
+
+                JPanel btnPanel = new JPanel();
+                btnPanel.add(okBtn);
+                btnPanel.add(cancelBtn);
+                dialog.add(btnPanel, BorderLayout.SOUTH);
+                dialog.pack();
+                dialog.setResizable(false);
+                dialog.setTitle("Выбор цвета: " + (type ? "наборный" : "плитка"));
+                dialog.setSize(400, 200);
+                dialog.setIconImage(new ImageIcon(
+                        Objects.requireNonNull(
+                                this.getClass().getResource("/palette.png")
+                        )
+                ).getImage());
+            }
+            dialog.setVisible(true);
+            return ok;
+        }
+
+        public Color getColor(){
+            return color;
+        }
+    }
+
+    private static class CustomBtn extends JButton{
+        public CustomBtn(String name, Font font, ActionListener listener){
+            setText(name);
+            addActionListener(listener);
+            setFont(font);
+        }
+    }
+}
