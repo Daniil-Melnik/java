@@ -11,7 +11,8 @@
 - все панели изменений провести через строку меню
 */
 
-// 0 разделить проект на несколько файлов (возможны классы-фабрики)
+// 0 добавить изменение размера с прверкой размеров строки
+// 1 добавить панель с информацией о шрифте
 
 package testing.LevelFour;
 
@@ -19,6 +20,9 @@ import javax.swing.*;
 import javax.swing.border.EtchedBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.PlainDocument;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.*;
@@ -36,6 +40,8 @@ public class LevelFour {
     private static final int TEXT_PANEL_W = 800;
     private static final int TEXT_PANEL_H = 350;
 
+    private static final int MAX_TEXT_W = 750;
+
     public static void main(String... args){
         EventQueue.invokeLater(() -> {
             mainFrame = new MainFrame();
@@ -47,7 +53,7 @@ public class LevelFour {
         public MainFrame(){
             setSize(FRAME_W, FRAME_H);
             setDefaultCloseOperation(EXIT_ON_CLOSE);
-            setResizable(false);
+            //setResizable(false);
             setTitle("Просмотр текста");
             setLayout(new BorderLayout());
             setIconImage(
@@ -104,10 +110,17 @@ public class LevelFour {
             g.drawString(text, (TEXT_PANEL_W - strWidth) / 2,(TEXT_PANEL_H - strHeight) / 2);
         }
 
-
+        public FontMetrics getFM(){
+            return getFontMetrics(font);
+        }
 
         public void setFont() {
-            font = new Font(fontName, fontOutline, fontSize);
+            Font newFont = new Font(fontName, fontOutline, fontSize);
+            if (getFontMetrics(newFont).stringWidth(text) <= MAX_TEXT_W){
+                font = newFont;
+            } else {
+                JOptionPane.showMessageDialog(mainFrame, "Слишком длинная строка, уменьшите пожалуйста её длину", "Длинная строка", JOptionPane.ERROR_MESSAGE);
+            }
         }
 
         public void setFontName(String fN) {
@@ -122,10 +135,16 @@ public class LevelFour {
             fontSize = fS;
         }
 
-        public void setText(String t) {
+        public void setText(String t) throws BadLocationException {
             FontMetrics fm = getFontMetrics(font);
-            if (fm.stringWidth(t) <= TEXT_PANEL_W - fm.stringWidth("W") * 6){
+
+            if (fm.stringWidth(t) > MAX_TEXT_W){
+                textInfoPanel.getInputTextField().setDocument(new LimitDocument(t.length() - 1));
+                textInfoPanel.getInputTextField().setText(text);
+            }
+            else{
                 text = t;
+                ((LimitDocument) textInfoPanel.getInputTextField().getDocument()).updateDocument(text.length() + 1);
             }
         }
 
@@ -133,7 +152,7 @@ public class LevelFour {
             return text;
         }
 
-        public void setComponent(String t, Font f){
+        public void setComponent(String t, Font f) throws BadLocationException {
             setText(t);
             setFont(f);
         }
@@ -165,29 +184,17 @@ public class LevelFour {
     */
 
     private static class TextInfoPanel extends JPanel{
+        private JTextField inputTextField;
+        private LimitDocument limitDocument;
+
         public TextInfoPanel(){
+            limitDocument = new LimitDocument(100);
             setBorder(new EtchedBorder());
             setLayout(new GridBagLayout());
-            JTextField inputTextField = new JTextField();
+            inputTextField = new JTextField();
             inputTextField.setFont(new Font("Arial", Font.PLAIN, 20));
             inputTextField.setText(textComponent.getText());
-            inputTextField.getDocument().addDocumentListener(new DocumentListener() {
-                @Override
-                public void insertUpdate(DocumentEvent e) {
-                    textComponent.setText(inputTextField.getText());
-                    textComponent.repaint();
-                }
-
-                @Override
-                public void removeUpdate(DocumentEvent e) {
-                    textComponent.setText(inputTextField.getText());
-                    textComponent.repaint();
-                }
-
-                @Override
-                public void changedUpdate(DocumentEvent e) {
-                }
-            });
+            inputTextField.setDocument(limitDocument);
 
             JLabel textLabel = new JLabel("Строка:");
             textLabel.setFont(new Font("Arial", Font.PLAIN, 20));
@@ -198,6 +205,10 @@ public class LevelFour {
             JPanel fillPanel = new JPanel();
 
             add(fillPanel, new GBC(0, 1, 16, 2).setWeight(1, 1).setFill(1));
+        }
+
+        public JTextField getInputTextField(){
+            return inputTextField;
         }
 
         @Override
@@ -294,6 +305,53 @@ public class LevelFour {
             textComponent.setFontOutline(outline);
             textComponent.setFont();
             textComponent.repaint();
+        }
+    }
+
+    private static class LimitDocument extends PlainDocument{
+        private int limit;
+
+        public LimitDocument(int l){
+            super();
+            limit = l;
+            addDocumentListener(new DocumentListener() {
+                @Override
+                public void insertUpdate(DocumentEvent e) {
+                    try {
+                        textComponent.setText(getText(0, getLength()));
+                        textComponent.repaint();
+                    } catch (BadLocationException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                }
+
+                @Override
+                public void removeUpdate(DocumentEvent e) {
+                    try {
+                        textComponent.setText(getText(0, getLength()));
+                        textComponent.repaint();
+                    } catch (BadLocationException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                }
+
+                @Override
+                public void changedUpdate(DocumentEvent e) {
+                }
+            });
+        }
+
+        public void updateDocument(int l){
+            limit = l;
+        }
+
+        @Override
+        public void insertString(int offs, String str, AttributeSet a) throws BadLocationException {
+            if (str == null) return;
+
+            if ((getLength() + str.length() <= limit)){
+                super.insertString(offs, str, a);
+            }
         }
     }
 }
