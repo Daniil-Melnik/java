@@ -2,12 +2,14 @@ package testing.LevelFour;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.*;
+import java.util.List;
 
 public class DialogWindows {
     private static final Font font20 = new Font("Arial", Font.BOLD, 20);
@@ -31,7 +33,6 @@ public class DialogWindows {
             owner = o;
 
             fontCombo = new JComboBox<>(getFontsFromFile().toArray(new String[0]));
-
 
             JPanel btnPanel = new JPanel();
             CustomBtn okBtn = new CustomBtn("ок", font12, (e) -> {ok = true; dialog.setVisible(false);});
@@ -82,6 +83,32 @@ public class DialogWindows {
         public String getText(){
             return Objects.requireNonNull(fontCombo.getSelectedItem()).toString();
         }
+    }
+
+    public static class TextSizeChooser extends JPanel{
+        private boolean ok = false;
+        private JDialog dialog = null;
+        private static ArrayList<Integer> items;
+
+        {
+            for (int i = 1; i < 72; i++){
+                items.add(i);
+            }
+        }
+
+        public TextSizeChooser(){
+            setLayout(new BorderLayout());
+            JComboBox<Integer> combo = new JComboBox<>(items.toArray(new Integer[0]));
+
+            JPanel btnPanel = new JPanel();
+            btnPanel.setLayout(new FlowLayout());
+            JButton okBtn = new JButton("ок");
+            JButton cancelBtn = new JButton("отмена");
+        }
+
+        /*public boolean showDialog(){
+
+        }*/
     }
 
     public static class TextColorChooser extends JPanel{

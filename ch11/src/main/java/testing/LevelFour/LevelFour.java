@@ -276,6 +276,9 @@ public class LevelFour {
                 }
             });
 
+            JMenuItem textSizeItem = new JMenuItem("Размер текста");
+
+
             colorMenu.add(colorAddsItem);
             colorMenu.add(colorPaletteItem);
 
