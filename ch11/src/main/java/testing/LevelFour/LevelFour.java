@@ -192,7 +192,8 @@ public class LevelFour {
             setLayout(new GridBagLayout());
             inputTextField = new JTextField();
             inputTextField.setFont(new Font("Arial", Font.PLAIN, 20));
-            inputTextField.setText(textComponent.getText());
+            
+            inputTextField.setText("Hello, it's text component");
             inputTextField.setDocument(limitDocument);
 
             JLabel textLabel = new JLabel("Строка:");
@@ -262,10 +263,16 @@ public class LevelFour {
             JPanel fontMetricsPanel = new JPanel();
 
             fontInfoPanel.setLayout(new GridBagLayout());
+            fontMetricsPanel.setLayout(new GridBagLayout());
 
             for (Map.Entry<String, String> e : textComponent.getFontInfo().entrySet()){
                 valuesMap.put(e.getKey(), new JLabel(e.getValue()));
             }
+
+            for (Map.Entry<String, String> e : textComponent.getStringMetrics().entrySet()){
+                metricsMap.put(e.getKey(), new JLabel(e.getValue()));
+            }
+
             int i = 0;
             for (String s : labelsMap.keySet()){
                 labelsMap.get(s).setFont(font12);
@@ -283,18 +290,37 @@ public class LevelFour {
                 i++;
             }
 
-            fontMetricsPanel.setLayout(new GridBagLayout());
+            i = 0;
+
+            for (String s : metricsMap.keySet()){
+                fontMetricsPanel.add(labelsMetrMap.get(s),
+                        new GBC(0, i, 1, 1)
+                                .setWeight(0, 0.25)
+                                .setAnchor(GBC.EAST)
+                                .setInsets(0,0,10,0));
+                fontMetricsPanel.add(metricsMap.get(s),
+                        new GBC(1, i, 1, 1)
+                                .setWeight(1, 0.25)
+                                .setAnchor(GBC.EAST)
+                                .setInsets(0,0,0,10));
+                i++;
+            }
+
+            fontMetricsPanel.setBorder(new EtchedBorder());
             fontInfoPanel.setBorder(new EtchedBorder());
-            fontMetricsPanel.setBackground(Color.GREEN);
 
             add(fontInfoPanel);
-            add(fontMetricsPanel);
             add(new JPanel());
+            add(fontMetricsPanel);
         }
 
         public void updatePanel(){
             for (Map.Entry<String, String> e : textComponent.getFontInfo().entrySet()){
                 valuesMap.get(e.getKey()).setText(e.getValue());
+            }
+
+            for (Map.Entry<String, String> e : textComponent.getStringMetrics().entrySet()){
+                metricsMap.get(e.getKey()).setText(e.getValue());
             }
             repaint();
         }
@@ -415,6 +441,7 @@ public class LevelFour {
                 public void insertUpdate(DocumentEvent e) {
                     try {
                         textComponent.setText(getText(0, getLength()));
+                        textInfoPanel.updatePanel();
                         textComponent.repaint();
                     } catch (BadLocationException ex) {
                         throw new RuntimeException(ex);
@@ -425,6 +452,7 @@ public class LevelFour {
                 public void removeUpdate(DocumentEvent e) {
                     try {
                         textComponent.setText(getText(0, getLength()));
+                        textInfoPanel.updatePanel();
                         textComponent.repaint();
                     } catch (BadLocationException ex) {
                         throw new RuntimeException(ex);
