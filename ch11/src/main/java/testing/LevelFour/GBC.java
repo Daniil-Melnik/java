@@ -40,4 +40,10 @@ public class GBC extends GridBagConstraints {
         this.insets = new Insets(t, l, b, r);
         return this;
     }
+
+    public GBC setIpad(int ix, int iy){
+        this.ipadx = ix;
+        this.ipady = iy;
+        return this;
+    }
 }

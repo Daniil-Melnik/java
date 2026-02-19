@@ -15,12 +15,19 @@ public class DialogWindows {
     private static final Font font20 = new Font("Arial", Font.BOLD, 20);
     private static final Font font12 = new Font("Arial", Font.BOLD, 12);
 
+    private static final int COMBO_DIALOG_W = 380;
+    private static final int COMBO_DIALOG_H = 110;
+
     public static TextAdder getTextAddedDialog(JFrame f) throws IOException {
         return new TextAdder(f);
     }
 
     public static TextColorChooser getTextColorChooser(JFrame f, boolean t, Color currColor){
         return new TextColorChooser(f, t, currColor);
+    }
+
+    public static TextSizeChooser getTextSizeChooser(JFrame f){
+        return new TextSizeChooser(f);
     }
 
     public static class TextAdder extends JPanel {
@@ -67,7 +74,7 @@ public class DialogWindows {
             if (dialog == null){
                 dialog = new JDialog(owner, true); // JDialog - база всех диалоговых окно, подобна JFrame
                 dialog.add(this); // добавление в базу диалогового окна наполнения из панели
-                dialog.setSize(new Dimension(380, 110));
+                dialog.setSize(new Dimension(COMBO_DIALOG_W, COMBO_DIALOG_H));
                 dialog.setTitle("Выбор шрифта");
                 dialog.setIconImage(
                         new ImageIcon(
@@ -88,27 +95,50 @@ public class DialogWindows {
     public static class TextSizeChooser extends JPanel{
         private boolean ok = false;
         private JDialog dialog = null;
+        private JFrame owner = null;
         private static ArrayList<Integer> items;
+        private JComboBox<Integer> sizeCombo = null;
 
         {
+            items = new ArrayList<>();
             for (int i = 1; i < 72; i++){
                 items.add(i);
             }
         }
 
-        public TextSizeChooser(){
+        public TextSizeChooser(JFrame o){
+            owner = o;
             setLayout(new BorderLayout());
-            JComboBox<Integer> combo = new JComboBox<>(items.toArray(new Integer[0]));
+            sizeCombo = new JComboBox<>(items.toArray(new Integer[0]));
+            sizeCombo.setFont(font20);
 
             JPanel btnPanel = new JPanel();
             btnPanel.setLayout(new FlowLayout());
-            JButton okBtn = new JButton("ок");
-            JButton cancelBtn = new JButton("отмена");
+
+            JButton okBtn = new CustomBtn("ок", font12, (e) -> {ok = true; dialog.setVisible(false);});
+            JButton cancelBtn = new CustomBtn("отмена", font12, (e) -> {dialog.setVisible(false);});
+
+            btnPanel.add(okBtn);
+            btnPanel.add(cancelBtn);
+
+            add(sizeCombo, BorderLayout.CENTER);
+            add(btnPanel, BorderLayout.SOUTH);
         }
 
-        /*public boolean showDialog(){
+        public int getSizeFromCombo(){
+            return sizeCombo.getItemAt(sizeCombo.getSelectedIndex());
+        }
 
-        }*/
+        public boolean showDialog(){
+            if (dialog == null){
+                dialog = new JDialog(owner, true);
+                dialog.add(this);
+                dialog.setSize(COMBO_DIALOG_W, COMBO_DIALOG_H);
+                dialog.setTitle("Размер текста");
+                dialog.setVisible(true);
+            }
+            return ok;
+        }
     }
 
     public static class TextColorChooser extends JPanel{

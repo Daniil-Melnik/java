@@ -11,8 +11,8 @@
 - все панели изменений провести через строку меню
 */
 
-// 0 добавить изменение размера с прверкой размеров строки
-// 1 добавить панель с информацией о шрифте
+// 0 добавить панель с информацией о шрифте (ширина + высота)
+// добавлено взятие метрик из компонента, осталась отрисовка панели
 
 package testing.LevelFour;
 
@@ -30,15 +30,15 @@ import java.util.*;
 
 public class LevelFour {
     private static MainFrame mainFrame;
-    private static TextPanel textPanel;
     private static TextComponent textComponent;
+    private static BottomPanel bottomPanel;
     private static TextInfoPanel textInfoPanel;
 
     private static final int FRAME_W = 800;
-    private static final int FRAME_H = 500;
+    private static final int FRAME_H = 400;
 
     private static final int TEXT_PANEL_W = 800;
-    private static final int TEXT_PANEL_H = 350;
+    private static final int TEXT_PANEL_H = 250;
 
     private static final int MAX_TEXT_W = 750;
 
@@ -61,11 +61,11 @@ public class LevelFour {
                             Objects.requireNonNull(this.getClass().getResource("/text.png"))
                     ).getImage());
 
-            textPanel = new TextPanel();
-            textInfoPanel = new TextInfoPanel();
+            TextPanel textPanel = new TextPanel();
+            bottomPanel = new BottomPanel();
 
             add(textPanel, BorderLayout.CENTER);
-            add(textInfoPanel, BorderLayout.SOUTH);
+            add(bottomPanel, BorderLayout.SOUTH);
 
             setJMenuBar(new MainMenuBar());
         }
@@ -139,12 +139,12 @@ public class LevelFour {
             FontMetrics fm = getFontMetrics(font);
 
             if (fm.stringWidth(t) > MAX_TEXT_W){
-                textInfoPanel.getInputTextField().setDocument(new LimitDocument(t.length() - 1));
-                textInfoPanel.getInputTextField().setText(text);
+                bottomPanel.getInputTextField().setDocument(new LimitDocument(t.length() - 1));
+                bottomPanel.getInputTextField().setText(text);
             }
             else{
                 text = t;
-                ((LimitDocument) textInfoPanel.getInputTextField().getDocument()).updateDocument(text.length() + 1);
+                ((LimitDocument) bottomPanel.getInputTextField().getDocument()).updateDocument(text.length() + 1);
             }
         }
 
@@ -163,6 +163,56 @@ public class LevelFour {
 
         public Color getColor(){
             return color;
+        }
+
+        public LinkedHashMap<String, String> getFontInfo(){
+            LinkedHashMap<String, String> info = new LinkedHashMap<>(4);
+            info.put("fontName", fontName);
+            info.put("fontOutline", fontOutline == Font.BOLD ? "Bold" : fontOutline == Font.PLAIN ? "Plain" : fontOutline == Font.ITALIC ? "Italic" : "ERROR");
+            info.put("fontSize", Integer.valueOf(fontSize).toString());
+            info.put("fontColor", String.format("%d, %d, %d", color.getRed(), color.getGreen(), color.getBlue()));
+            return info;
+        }
+
+        public LinkedHashMap<String, String> getStringMetrics(){
+            LinkedHashMap<String, String> metrics = new LinkedHashMap<>(2);
+            metrics.put("strWidth", Integer.toString(getFM().stringWidth(text)));
+            metrics.put("strHeight", Integer.toString(getFM().getHeight()));
+            return metrics;
+        }
+    }
+
+    private static class BottomPanel extends JPanel{
+        private JTextField inputTextField;
+        private LimitDocument limitDocument;
+
+        public BottomPanel(){
+            limitDocument = new LimitDocument(100);
+            setBorder(new EtchedBorder());
+            setLayout(new GridBagLayout());
+            inputTextField = new JTextField();
+            inputTextField.setFont(new Font("Arial", Font.PLAIN, 20));
+            inputTextField.setText(textComponent.getText());
+            inputTextField.setDocument(limitDocument);
+
+            JLabel textLabel = new JLabel("Строка:");
+            textLabel.setFont(new Font("Arial", Font.PLAIN, 20));
+
+            add(textLabel, new GBC(0, 0, 2, 1).setWeight(0, 0.1).setAnchor(GBC.EAST).setInsets(0, 0, 10, 0));
+            add(inputTextField, new GBC(2, 0, 14, 1).setWeight(1, 0.1).setFill(1).setInsets(10));
+
+            textInfoPanel = new TextInfoPanel();
+
+            add(textInfoPanel, new GBC(0, 1, 16, 2).setWeight(1, 1).setFill(1));
+        }
+
+        public JTextField getInputTextField(){
+            return inputTextField;
+        }
+
+        @Override
+        public Dimension getPreferredSize() {
+            return new Dimension(TEXT_PANEL_W, FRAME_H - TEXT_PANEL_H);
         }
     }
 
@@ -184,36 +234,69 @@ public class LevelFour {
     */
 
     private static class TextInfoPanel extends JPanel{
-        private JTextField inputTextField;
-        private LimitDocument limitDocument;
+        private static final Font font12 = new Font("Arial", Font.BOLD, 12);
+
+        LinkedHashMap<String, JLabel> valuesMap = new LinkedHashMap<>(4);
+        LinkedHashMap<String, JLabel> metricsMap = new LinkedHashMap<>();
+        Map<String, JLabel> labelsMap;
+        Map<String, JLabel> labelsMetrMap;
+
+        {
+            labelsMap = Map.of(
+                    "fontName", new JLabel("Название:"),
+                    "fontOutline", new JLabel("Начертание:"),
+                    "fontSize", new JLabel("Размер"),
+                    "fontColor", new JLabel("Цвет:")
+            );
+
+            labelsMetrMap = Map.of(
+                    "strWidth", new JLabel("Ширина:"),
+                    "strHeight", new JLabel("Высота:")
+            );
+        }
 
         public TextInfoPanel(){
-            limitDocument = new LimitDocument(100);
-            setBorder(new EtchedBorder());
-            setLayout(new GridBagLayout());
-            inputTextField = new JTextField();
-            inputTextField.setFont(new Font("Arial", Font.PLAIN, 20));
-            inputTextField.setText(textComponent.getText());
-            inputTextField.setDocument(limitDocument);
+            setLayout(new GridLayout(1, 3));
 
-            JLabel textLabel = new JLabel("Строка:");
-            textLabel.setFont(new Font("Arial", Font.PLAIN, 20));
+            JPanel fontInfoPanel = new JPanel();
+            JPanel fontMetricsPanel = new JPanel();
 
-            add(textLabel, new GBC(0, 0, 2, 1).setWeight(0, 0.1).setAnchor(GBC.EAST).setInsets(0, 0, 10, 0));
-            add(inputTextField, new GBC(2, 0, 14, 1).setWeight(1, 0.1).setFill(1).setInsets(10));
+            fontInfoPanel.setLayout(new GridBagLayout());
 
-            JPanel fillPanel = new JPanel();
+            for (Map.Entry<String, String> e : textComponent.getFontInfo().entrySet()){
+                valuesMap.put(e.getKey(), new JLabel(e.getValue()));
+            }
+            int i = 0;
+            for (String s : labelsMap.keySet()){
+                labelsMap.get(s).setFont(font12);
+                valuesMap.get(s).setFont(font12);
+                fontInfoPanel.add(labelsMap.get(s),
+                        new GBC(0, i, 1, 1)
+                                .setWeight(0, 0.25)
+                                .setInsets(0, 0, 10, 0)
+                                .setAnchor(GBC.EAST));
+                fontInfoPanel.add(valuesMap.get(s),
+                        new GBC(1, i, 1, 1)
+                                .setWeight(1, 0.25)
+                                .setInsets(0,0,0, 5)
+                                .setAnchor(GBC.EAST));
+                i++;
+            }
 
-            add(fillPanel, new GBC(0, 1, 16, 2).setWeight(1, 1).setFill(1));
+            fontMetricsPanel.setLayout(new GridBagLayout());
+            fontInfoPanel.setBorder(new EtchedBorder());
+            fontMetricsPanel.setBackground(Color.GREEN);
+
+            add(fontInfoPanel);
+            add(fontMetricsPanel);
+            add(new JPanel());
         }
 
-        public JTextField getInputTextField(){
-            return inputTextField;
-        }
-
-        @Override
-        public Dimension getPreferredSize() {
-            return new Dimension(TEXT_PANEL_W, FRAME_H - TEXT_PANEL_H);
+        public void updatePanel(){
+            for (Map.Entry<String, String> e : textComponent.getFontInfo().entrySet()){
+                valuesMap.get(e.getKey()).setText(e.getValue());
+            }
+            repaint();
         }
     }
 
@@ -241,10 +324,6 @@ public class LevelFour {
             outlineMenu.add(outlineItemBold);
             outlineMenu.add(outlineItemItalic);
 
-            outlineItemPlain.addActionListener((e) -> {
-                textComponent.setFontOutline(Font.PLAIN);
-            });
-
             shriftItem.addActionListener((e) -> {
                 try {
                     DialogWindows.TextAdder tA = DialogWindows.getTextAddedDialog(mainFrame);
@@ -252,6 +331,7 @@ public class LevelFour {
                         textComponent.setFontName(tA.getText());
                         textComponent.setFont();
                         textComponent.repaint();
+                        textInfoPanel.updatePanel();
                     }
                 } catch (IOException ex) {System.out.println(ex.getMessage());}
 
@@ -265,6 +345,7 @@ public class LevelFour {
                 if (tC.showDialog()){
                     textComponent.setColor(tC.getColor());
                     textComponent.repaint();
+                    textInfoPanel.updatePanel();
                 }
             });
 
@@ -273,10 +354,20 @@ public class LevelFour {
                 if (tC.showDialog()){
                     textComponent.setColor(tC.getColor());
                     textComponent.repaint();
+                    textInfoPanel.updatePanel();
                 }
             });
 
-            JMenuItem textSizeItem = new JMenuItem("Размер текста");
+            JMenuItem textSizeItem = new JMenuItem("Размер");
+            textSizeItem.addActionListener((e) -> {
+                DialogWindows.TextSizeChooser tSC = DialogWindows.getTextSizeChooser(mainFrame);
+                if (tSC.showDialog()){
+                    textComponent.setFontSize(tSC.getSizeFromCombo());
+                    textComponent.setFont();
+                    textComponent.repaint();
+                    textInfoPanel.updatePanel();
+                }
+            });
 
 
             colorMenu.add(colorAddsItem);
@@ -284,6 +375,7 @@ public class LevelFour {
 
             fontMenu.add(shriftItem);
             fontMenu.add(outlineMenu);
+            fontMenu.add(textSizeItem);
 
             add(fileMenu);
             add(fontMenu);
@@ -308,6 +400,7 @@ public class LevelFour {
             textComponent.setFontOutline(outline);
             textComponent.setFont();
             textComponent.repaint();
+            textInfoPanel.updatePanel();
         }
     }
 
