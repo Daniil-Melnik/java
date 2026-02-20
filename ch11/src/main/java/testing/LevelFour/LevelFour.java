@@ -53,7 +53,7 @@ public class LevelFour {
     private static class MainFrame extends JFrame{
         public MainFrame(){
             setSize(FRAME_W, FRAME_H);
-            setDefaultCloseOperation(EXIT_ON_CLOSE);
+            setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
             setResizable(false);
             setTitle("Просмотр текста");
             setLayout(new BorderLayout());
@@ -129,7 +129,7 @@ public class LevelFour {
         }
 
         public void setFontOutline(int fO) {
-            fontOutline = (fO >= 0 && fO <=2) ? fO : Font.PLAIN; // проверка на принадлежность [PLAIN; ITALIC]
+            fontOutline = (fO >= Font.PLAIN && fO <=Font.ITALIC) ? fO : Font.PLAIN; // проверка на принадлежность [PLAIN; ITALIC]
         }
 
         public void setFontSize(int fS) {
