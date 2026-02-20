@@ -25,6 +25,7 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.PlainDocument;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.io.*;
 import java.util.*;
 
@@ -53,7 +54,7 @@ public class LevelFour {
         public MainFrame(){
             setSize(FRAME_W, FRAME_H);
             setDefaultCloseOperation(EXIT_ON_CLOSE);
-            //setResizable(false);
+            setResizable(false);
             setTitle("Просмотр текста");
             setLayout(new BorderLayout());
             setIconImage(
@@ -217,23 +218,6 @@ public class LevelFour {
         }
     }
 
-    /*
-    - Файл
-
-    + Шрифт
-      ++ гарнитура
-      ++ начертание
-      -- размер
-
-    + цвет
-      ++ наборный
-      ++ константный
-
-    панель с информацией от текущих настройках + размеры строки в пикселях
-
-    - Содержание (- всегда через панель)
-    */
-
     private static class TextInfoPanel extends JPanel{
         private static final Font font12 = new Font("Arial", Font.BOLD, 12);
 
@@ -251,8 +235,8 @@ public class LevelFour {
             );
 
             labelsMetrMap = Map.of(
-                    "strWidth", new JLabel("Ширина:"),
-                    "strHeight", new JLabel("Высота:")
+                    "strWidth", new JLabel("Ширина (пкс):"),
+                    "strHeight", new JLabel("Высота (пкс):")
             );
         }
 
@@ -331,13 +315,33 @@ public class LevelFour {
         private static final boolean ADDITIVE = true;
 
         public MainMenuBar(){
-            JMenu fileMenu = new JMenu("Файл");
-            JMenu fontMenu = new JMenu("Шрифт");
-            JMenu colorMenu = new JMenu("Цвет");
+            JMenu fileMenu = new JMenu("Файл (F)");
+            JMenu fontMenu = new JMenu("Шрифт (S)");
+            JMenu colorMenu = new JMenu("Цвет (C)");
 
-            JMenu outlineMenu = new JMenu("Начертание");
+            JMenu outlineMenu = new JMenu("Начертание (O)");
 
-            JMenuItem shriftItem = new JMenuItem("Гарнитура");
+            outlineMenu.setMnemonic(KeyEvent.VK_O);
+            fileMenu.setMnemonic(KeyEvent.VK_F);
+            fontMenu.setMnemonic(KeyEvent.VK_S);
+            colorMenu.setMnemonic(KeyEvent.VK_C);
+
+            JMenuItem exitItem = new JMenuItem("Выход (E)", 'E');
+            JMenuItem aboutItem = new JMenuItem("О программе (A)", 'A');
+
+            exitItem.addActionListener((e) -> {System.exit(0);});
+
+            aboutItem.addActionListener((e) -> {
+                JOptionPane.showMessageDialog(mainFrame,
+                        "Праграмма подбора дизайна строки по гарнитуре, размеру, начертанию и цвету.",
+                        "О программе",
+                        JOptionPane.INFORMATION_MESSAGE);
+            });
+
+            fileMenu.add(exitItem);
+            fileMenu.add(aboutItem);
+
+            JMenuItem shriftItem = new JMenuItem("Гарнитура (G)", 'G');
             ButtonGroup radioGroup = new ButtonGroup();
             JRadioButtonMenuItem outlineItemPlain = new JRadioButtonMenuItem(new OutlineAction("Plain"));
             JRadioButtonMenuItem outlineItemBold = new JRadioButtonMenuItem(new OutlineAction("Bold"));
@@ -363,8 +367,8 @@ public class LevelFour {
 
             });
 
-            JMenuItem colorAddsItem = new JMenuItem("Наборный");
-            JMenuItem colorPaletteItem = new JMenuItem("Плитка");
+            JMenuItem colorAddsItem = new JMenuItem("Наборный (N)", 'N');
+            JMenuItem colorPaletteItem = new JMenuItem("Плитка (P)", 'P');
 
             colorAddsItem.addActionListener((e) -> {
                 DialogWindows.TextColorChooser tC = DialogWindows.getTextColorChooser(mainFrame, ADDITIVE, textComponent.getColor());
@@ -384,7 +388,7 @@ public class LevelFour {
                 }
             });
 
-            JMenuItem textSizeItem = new JMenuItem("Размер");
+            JMenuItem textSizeItem = new JMenuItem("Размер (S)", 'S');
             textSizeItem.addActionListener((e) -> {
                 DialogWindows.TextSizeChooser tSC = DialogWindows.getTextSizeChooser(mainFrame);
                 if (tSC.showDialog()){

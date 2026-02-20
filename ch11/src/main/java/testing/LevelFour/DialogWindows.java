@@ -134,6 +134,12 @@ public class DialogWindows {
                 dialog = new JDialog(owner, true);
                 dialog.add(this);
                 dialog.setSize(COMBO_DIALOG_W, COMBO_DIALOG_H);
+                dialog.setIconImage(new ImageIcon(
+                        Objects.requireNonNull(
+                                this.getClass()
+                                        .getResource("/text-width.png"))
+                ).getImage());
+
                 dialog.setTitle("Размер текста");
                 dialog.setVisible(true);
             }
