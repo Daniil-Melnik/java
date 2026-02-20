@@ -258,14 +258,14 @@ public class LevelThree {
 
             JMenu newGameMenu = new JMenu("Новая (N)");
 
-            JMenuItem exitItem = new JMenuItem("Выход (E)", 'E');
-            JMenuItem aboutItem = new JMenuItem("О программе (A)", 'A');
+            JMenuItem exitItem = new JMenuItem("Выход (E)", 'E'); // конструирование пунктов меню
+            JMenuItem aboutItem = new JMenuItem("О программе (A)", 'A');// с мнемониками
 
             JMenuItem newGameItem = new JMenuItem("Случайная (R)", 'R');
             JMenuItem saveGameItem = new JMenuItem("Сохранить (S)", 'S');
             JMenuItem loadGameItem = new JMenuItem("Загрузить (L)", 'L');
 
-            gameMenu.setMnemonic(KeyEvent.VK_G);
+            gameMenu.setMnemonic(KeyEvent.VK_G); // присвоение мнемоник Alt + __ меню
             mainMenu.setMnemonic(KeyEvent.VK_F);
             newGameMenu.setMnemonic(KeyEvent.VK_N);
 
