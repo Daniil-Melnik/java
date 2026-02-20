@@ -17,6 +17,7 @@ package testing;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
+import java.awt.event.KeyEvent;
 import java.io.*;
 import java.util.*;
 import java.util.List;
@@ -252,17 +253,21 @@ public class LevelThree {
     private static class MainMenuBar extends JMenuBar{ // строка главного меню
 
         public MainMenuBar(){
-            JMenu mainMenu = new JMenu("Файл");
-            JMenu gameMenu = new JMenu("Игра");
+            JMenu mainMenu = new JMenu("Файл (F)");
+            JMenu gameMenu = new JMenu("Игра (G)");
 
-            JMenu newGameMenu = new JMenu("Новая");
+            JMenu newGameMenu = new JMenu("Новая (N)");
 
-            JMenuItem exitItem = new JMenuItem("Выход");
-            JMenuItem aboutItem = new JMenuItem("О программе");
+            JMenuItem exitItem = new JMenuItem("Выход (E)", 'E');
+            JMenuItem aboutItem = new JMenuItem("О программе (A)", 'A');
 
-            JMenuItem newGameItem = new JMenuItem("Случайная");
-            JMenuItem saveGameItem = new JMenuItem("Сохранить");
-            JMenuItem loadGameItem = new JMenuItem("Загрузить");
+            JMenuItem newGameItem = new JMenuItem("Случайная (R)", 'R');
+            JMenuItem saveGameItem = new JMenuItem("Сохранить (S)", 'S');
+            JMenuItem loadGameItem = new JMenuItem("Загрузить (L)", 'L');
+
+            gameMenu.setMnemonic(KeyEvent.VK_G);
+            mainMenu.setMnemonic(KeyEvent.VK_F);
+            newGameMenu.setMnemonic(KeyEvent.VK_N);
 
             newGameItem.addActionListener((e) -> { // новая случайная игра
                 gameLogic.shuffleField(); // перемешать текущее поле
