@@ -15,6 +15,7 @@ package testing;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -299,7 +300,6 @@ public class LevelTwo {
                     default:
                         i++;
                 }
-                System.out.println(sA);
             }
 
             i = 0;
@@ -330,7 +330,6 @@ public class LevelTwo {
                     default:
                         i++;
                 }
-                System.out.println(sA);
             }
             return Integer.parseInt(sA.get(0));
         }
@@ -357,11 +356,14 @@ public class LevelTwo {
             JRadioButtonMenuItem radioItem = null;
             ButtonGroup group = new ButtonGroup(); // группа пунктов меню - радио-кнопок
 
-            JMenu exitMenu = new JMenu("Файл");
-            JMenu numSysMenu = new JMenu("СисСчис"); // меню для радио-кнопок
+            JMenu fileMenu = new JMenu("Файл (F)");
+            JMenu radixMenu = new JMenu("СисСчис (R)"); // меню для радио-кнопок
 
-            JMenuItem exitItem = new JMenuItem("Закрыть");
-            JMenuItem aboutItem = new JMenuItem("О программе");
+            fileMenu.setMnemonic(KeyEvent.VK_F);
+            radixMenu.setMnemonic(KeyEvent.VK_R);
+
+            JMenuItem exitItem = new JMenuItem("Закрыть (E)", 'E');
+            JMenuItem aboutItem = new JMenuItem("О программе (A)", 'A');
 
             for (int i : items){
 
@@ -371,9 +373,8 @@ public class LevelTwo {
 
                 radioItem.addActionListener((e) -> {
                     screenComponent.setRadix(i);
-                    System.out.println(i);
                 });
-                numSysMenu.add(radioItem);
+                radixMenu.add(radioItem);
             }
 
             exitItem.addActionListener((e) -> {
@@ -389,11 +390,11 @@ public class LevelTwo {
                         "О программе", JOptionPane.INFORMATION_MESSAGE);
             });
 
-            exitMenu.add(exitItem);
-            exitMenu.add(aboutItem);
+            fileMenu.add(exitItem);
+            fileMenu.add(aboutItem);
 
-            add(exitMenu);
-            add(numSysMenu);
+            add(fileMenu);
+            add(radixMenu);
         }
     }
 }
