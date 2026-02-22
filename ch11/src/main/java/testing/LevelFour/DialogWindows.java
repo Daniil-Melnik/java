@@ -1,15 +1,15 @@
 package testing.LevelFour;
 
+// класс с тремя типами 
+
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.*;
-import java.util.List;
 
 public class DialogWindows {
     private static final Font font20 = new Font("Arial", Font.BOLD, 20);
