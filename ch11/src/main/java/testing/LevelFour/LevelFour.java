@@ -93,7 +93,7 @@ public class LevelFour {
         private int fontSize = 26;
         private int fontOutline = Font.BOLD;
         private Font font;
-        private Color color = Color.BLACK;
+        private Color color = new Color(100, 100, 100);
 
         public TextComponent(){
             font = new Font(fontName, fontOutline, fontSize);
