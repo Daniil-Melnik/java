@@ -123,7 +123,7 @@ public class LevelThree {
                 gameLogic.move(this); // ход по игровой логике
                 gamePanel.rePaintButtons(); // перерисовка после хода
                 if (gameLogic.isWin()){ // если состояние поля выигрышное - сообщение о выигрыше
-                    JOptionPane.showMessageDialog(mainFrame, "Игра выиграна!");
+                    JOptionPane.showMessageDialog(mainFrame, "Выигрыш!");
                 }
             });
         }
@@ -279,6 +279,7 @@ public class LevelThree {
 
             saveGameItem.addActionListener((e) -> { // сохранение игры
                 JFileChooser chooser = new JFileChooser(); // применение диалога выбора файлов
+                chooser.setDialogTitle("Сохранить");
                 Date date = new Date(); // объект даты для формирования уникального имени файла сохранения
                 chooser.setFileFilter(new FileNameExtensionFilter("game files - txt", "txt"));
                 chooser.setSelectedFile(new File(String.format("game_%tY%tm%td_%tH%tM%tS.txt", date, date, date, date, date, date)));
@@ -298,6 +299,7 @@ public class LevelThree {
                 String[] newField;
                 JFileChooser chooser = new JFileChooser(); // применение диалога выбора фйалов
                 chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+                chooser.setDialogTitle("Загрузить");
                 chooser.setFileFilter(new FileNameExtensionFilter("game files", "txt")); // фильтр на текстовики
                 if (chooser.showOpenDialog(mainFrame) == JFileChooser.APPROVE_OPTION){
                     try {
