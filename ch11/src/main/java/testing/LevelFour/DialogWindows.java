@@ -20,7 +20,7 @@ public class DialogWindows {
 
     // 3 статических метода получения диалоговых окон
 
-    public static TextAdder getTextAddedDialog(JFrame f) throws IOException {
+    public static TextAdder getTextAddedDialog(JFrame f, int i) throws IOException {
         return new TextAdder(f);
     }
 
@@ -28,8 +28,8 @@ public class DialogWindows {
         return new TextColorChooser(f, t, currColor);
     }
 
-    public static TextSizeChooser getTextSizeChooser(JFrame f){
-        return new TextSizeChooser(f);
+    public static TextSizeChooser getTextSizeChooser(JFrame f, int i){
+        return new TextSizeChooser(f, i);
     }
 
     public static class TextAdder extends JPanel { // диалоговое окно выбора гарнитуры
@@ -116,10 +116,11 @@ public class DialogWindows {
             }
         }
 
-        public TextSizeChooser(JFrame o){
+        public TextSizeChooser(JFrame o, int initIndex){
             owner = o;
             setLayout(new BorderLayout());
             sizeCombo = new JComboBox<>(items.toArray(new Integer[0]));
+            sizeCombo.setSelectedIndex(initIndex);
             sizeCombo.setFont(font20);
 
             JPanel btnPanel = new JPanel();

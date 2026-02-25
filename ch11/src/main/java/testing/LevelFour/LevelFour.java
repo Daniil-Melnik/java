@@ -353,7 +353,7 @@ public class LevelFour {
 
             shriftItem.addActionListener((e) -> {
                 try { // получение диалогового окна выбора гарнитуры
-                    DialogWindows.TextAdder tA = DialogWindows.getTextAddedDialog(mainFrame);
+                    DialogWindows.TextAdder tA = DialogWindows.getTextAddedDialog(mainFrame, 0);
                     if (tA.showDialog()){ // если в диалоге нажата "ок" - возврат true => можно:
                         textComponent.setFontName(tA.getText()); // получить имя текста по методу из диалога
                         textComponent.setFont(); // обновить шрифт в компоненте и обновить сам компонент
@@ -387,7 +387,7 @@ public class LevelFour {
 
             JMenuItem textSizeItem = new JMenuItem("Размер (S)", 'S');
             textSizeItem.addActionListener((e) -> { // диалоговое окно выбора размера текста
-                DialogWindows.TextSizeChooser tSC = DialogWindows.getTextSizeChooser(mainFrame);
+                DialogWindows.TextSizeChooser tSC = DialogWindows.getTextSizeChooser(mainFrame, Integer.parseInt(textComponent.getFontInfo().get("fontSize")) - 1);
                 if (tSC.showDialog()){ // нажата "ок" =>
                     textComponent.setFontSize(tSC.getSizeFromCombo()); // получить выбранный размер из диалога
                     textComponent.setFont();
