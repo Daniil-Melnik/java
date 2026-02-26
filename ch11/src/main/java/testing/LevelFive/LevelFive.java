@@ -11,5 +11,34 @@
 
 package testing.LevelFive;
 
+import javax.swing.*;
+import java.awt.*;
+import java.util.Objects;
+
 public class LevelFive {
+    private static  JFrame mainFrame;
+
+    private static final int FRAME_W = 1000;
+    private static final int FRAME_H = 700;
+
+    public static void main (String [] args){
+
+        EventQueue.invokeLater(() -> {
+            mainFrame = new MainFrame();
+            mainFrame.setVisible(true);
+        });
+
+    }
+
+    private static class MainFrame extends JFrame{
+        public MainFrame(){
+            setSize(FRAME_W, FRAME_H);
+            setIconImage( new ImageIcon(
+                    Objects.requireNonNull(LevelFive.class.getResource("/photo.png"))).getImage()
+            );
+            setTitle("Фотосмотр");
+            setResizable(false);
+            setDefaultCloseOperation(EXIT_ON_CLOSE);
+        }
+    }
 }
