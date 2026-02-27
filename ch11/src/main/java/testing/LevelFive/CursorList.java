@@ -28,7 +28,9 @@ public class CursorList extends ArrayList<String> {
     }
 
     public void setCurrentIndex(int cI){
-        currentIndex = cI;
+        if ((cI >=0) && (cI < this.size())){
+            currentIndex = cI;
+        }
     }
 
     public int getCurrentIndex(){
@@ -78,6 +80,8 @@ public class CursorList extends ArrayList<String> {
 
         System.out.println(h.getNearElements());
 
-        h.setCurrentIndex(99);
+        h.setCurrentIndex(97);
+
+        System.out.println(h.getNearElements());
     }
 }
