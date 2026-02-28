@@ -11,6 +11,7 @@
 
 package testing.LevelFive;
 
+import javax.net.ssl.HandshakeCompletedEvent;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -32,7 +33,12 @@ public class LevelFive {
 
     private static final int BUTTON_PANEL_H = 50;
 
+    private static final int SMALL_PHOTO_W = 180;
+    private static final int SMALL_PHOTO_H = 140;
+
     private static PhotoHolder holder = new PhotoHolder();
+    private static ButtonPanel buttonPanel;
+    private static PhotoPanel photoPanel;
 
     public static void main (String [] args){
 
@@ -54,9 +60,12 @@ public class LevelFive {
             setResizable(false);
             setDefaultCloseOperation(EXIT_ON_CLOSE);
 
-            add(new PhotoPanel(), new GBC(0, 0, 1, 1));
+            buttonPanel = new ButtonPanel();
+            photoPanel = new PhotoPanel();
+
+            add(photoPanel, new GBC(0, 0, 1, 1));
             add(new PhotoSlidePanel(), new GBC(0, 1, 1, 1));
-            add(new ButtonPanel(), new GBC(0, 2, 1, 1));
+            add(buttonPanel, new GBC(0, 2, 1, 1));
             setJMenuBar(new MainMenuBar());
             pack();
         }
@@ -78,6 +87,7 @@ public class LevelFive {
     private static class PhotoSlidePanel extends JPanel{
         public PhotoSlidePanel(){
             setBackground(Color.RED);
+            setLayout(new GridLayout(1, 5));
         }
 
         @Override
@@ -95,6 +105,30 @@ public class LevelFive {
         public Dimension getPreferredSize() {
             return new Dimension(FRAME_W, BUTTON_PANEL_H);
         }
+    }
+
+    /*
+    Доработать компонент под два варианта: большое фото и малое фото
+    проработать расчёт размера фото под нормы
+    проработать большое фото под стрелки
+    проработать отобржение фото в пяти панелях слайдера
+    м.б. проработать нажатине на слайдерные
+    */
+
+    private static class PhotoComponent extends JComponent{
+
+        Image currentImage;
+        boolean type;
+
+        public PhotoComponent(Image cI, boolean t){
+            currentImage = cI;
+            type = t;
+        }
+
+        /*@Override
+        protected void paintComponent(Graphics g) {
+            g.drawImage(currentImage, )
+        }*/
     }
 
     private static class MainMenuBar extends JMenuBar{
