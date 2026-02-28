@@ -35,6 +35,10 @@ public class CursorList<T> extends ArrayList<T> {
         }
     }
 
+    public CursorList(List<T> list){
+        super(list);
+    }
+
     public int getCurrentIndex(){
         return currentIndex;
     }
