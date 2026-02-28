@@ -3,7 +3,9 @@ package testing.LevelFive;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CursorList extends ArrayList<String> {
+public class CursorList<T> extends ArrayList<T> {
+
+    private final int NEAR_CAPACITY = 5;
 
     private int currentIndex = 0;
 
@@ -15,7 +17,7 @@ public class CursorList extends ArrayList<String> {
         super(cap);
     }
 
-    public String getCurrent(){
+    public T getCurrent(){
         return this.get(currentIndex);
     }
 
@@ -37,51 +39,27 @@ public class CursorList extends ArrayList<String> {
         return currentIndex;
     }
 
-    public List<String> getNearElements(){
-        List<String> result = new ArrayList<>(5);
-        if ((currentIndex - 2 >= 0) && (currentIndex + 2 <= this.size())){
+    public List<T> getNearElements(){
+        List<T> result = new ArrayList<>(NEAR_CAPACITY);
+        if ((currentIndex - NEAR_CAPACITY / 2 >= 0) && (currentIndex + NEAR_CAPACITY / 2 <= this.size())){
             result = this.subList(currentIndex - 2, currentIndex + 2 + 1);
         }
         else if((currentIndex == 0) || (currentIndex == 1)){
-            if (this.size() < 5){
+            if (this.size() < NEAR_CAPACITY){
                 result = this;
             }
             else {
-                result = this.subList(0, 5);
+                result = this.subList(0, NEAR_CAPACITY);
             }
         }
         else if((currentIndex == this.size() - 1) || (currentIndex == this.size() - 2)){
-            if (this.size() < 5){
+            if (this.size() < NEAR_CAPACITY){
                 result = this;
             }
             else {
-                result = this.subList(this.size() - 5, this.size());
+                result = this.subList(this.size() - NEAR_CAPACITY, this.size());
             }
         }
         return result;
-    }
-
-    public static void main(String[] args){
-        CursorList h = new CursorList();
-        for (int i = 0; i < 100; i++){
-            h.add(i + "");
-        }
-        System.out.println(h.getNearElements());
-
-        h.incrCurrentIndex();
-
-        System.out.println(h.getNearElements());
-
-        h.incrCurrentIndex();
-
-        System.out.println(h.getNearElements());
-
-        h.incrCurrentIndex();
-
-        System.out.println(h.getNearElements());
-
-        h.setCurrentIndex(97);
-
-        System.out.println(h.getNearElements());
     }
 }
